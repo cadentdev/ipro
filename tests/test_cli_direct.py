@@ -74,9 +74,11 @@ class TestCmdInfoDirect:
         captured = capsys.readouterr()
         fields = captured.out.strip().split(',')
 
-        assert fields[1] == '1000'  # width
-        assert fields[2] == '1000'  # height
-        assert fields[3] == 'square'
+        assert fields[1] == 'JPEG'  # format
+        assert fields[2] == '1'  # frames
+        assert fields[3] == '1000'  # width
+        assert fields[4] == '1000'  # height
+        assert fields[5] == 'square'
 
     def test_cmd_info_with_exif(self, sample_image_with_exif, capsys):
         """Test cmd_info with EXIF flag."""

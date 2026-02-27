@@ -240,15 +240,17 @@ class TestInfoShortOutput:
         assert exit_code == 0
         fields = stdout.strip().split(',')
 
-        # Expected order: filename,width,height,orientation,ratio_raw,common_ratio,size_kb,creation_date
+        # Expected order: filename,format,frames,width,height,orientation,ratio_raw,common_ratio,size_kb,creation_date
         assert fields[0] == sample_square_image.name  # filename
-        assert fields[1] == '1000'  # width
-        assert fields[2] == '1000'  # height
-        assert fields[3] == 'square'  # orientation
-        assert fields[4] == '1:1'  # ratio_raw
-        assert fields[5] == '1:1'  # common_ratio
-        # fields[6] should be size_kb (number)
-        assert float(fields[6]) > 0
+        assert fields[1] == 'JPEG'  # format
+        assert fields[2] == '1'  # frames
+        assert fields[3] == '1000'  # width
+        assert fields[4] == '1000'  # height
+        assert fields[5] == 'square'  # orientation
+        assert fields[6] == '1:1'  # ratio_raw
+        assert fields[7] == '1:1'  # common_ratio
+        # fields[8] should be size_kb (number)
+        assert float(fields[8]) > 0
 
     def test_info_short_landscape(self, sample_landscape_image):
         """Test --short output for landscape image."""
@@ -257,11 +259,13 @@ class TestInfoShortOutput:
         assert exit_code == 0
         fields = stdout.strip().split(',')
 
-        assert fields[1] == '1920'  # width
-        assert fields[2] == '1080'  # height
-        assert fields[3] == 'landscape'  # orientation
-        assert fields[4] == '16:9'  # ratio_raw
-        assert fields[5] == '16:9'  # common_ratio
+        assert fields[1] == 'JPEG'  # format
+        assert fields[2] == '1'  # frames
+        assert fields[3] == '1920'  # width
+        assert fields[4] == '1080'  # height
+        assert fields[5] == 'landscape'  # orientation
+        assert fields[6] == '16:9'  # ratio_raw
+        assert fields[7] == '16:9'  # common_ratio
 
     def test_info_short_batch_compatible(self, sample_square_image, sample_landscape_image):
         """Test that multiple --short calls can be batched for CSV."""

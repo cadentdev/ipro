@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 from .fixtures import (
     create_test_image_file,
+    create_mpo_file,
     ASPECT_RATIOS,
     EXIF_DATA_FULL,
     EXIF_DATA_MINIMAL,
@@ -100,3 +101,16 @@ def sample_png_image(temp_dir):
     filepath = temp_dir / 'test.png'
     img.save(filepath, 'PNG')
     return filepath
+
+
+@pytest.fixture
+def sample_mpo_image(temp_dir):
+    """Create a synthetic MPO image with 2 frames for format testing."""
+    return create_mpo_file(
+        temp_dir,
+        filename='stereo.MPO',
+        frame1_size=(800, 600),
+        frame2_size=(800, 600),
+        frame1_color=(255, 0, 0),
+        frame2_color=(0, 0, 255),
+    )

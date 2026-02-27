@@ -564,6 +564,7 @@ def get_format_extension(format_str):
     # Map common formats to preferred extensions
     format_map = {
         "JPEG": ".jpg",
+        "MPO": ".jpg",
         "PNG": ".png",
         "HEIF": ".heic",
         "GIF": ".gif",
@@ -693,6 +694,8 @@ def get_image_info(filepath):
     with Image.open(filepath) as img:
         # Get dimensions (EXIF orientation is already handled by Pillow in most cases)
         width, height = img.size
+        image_format = img.format
+        n_frames = getattr(img, 'n_frames', 1)
 
     # Calculate ratios and orientation
     ratio_raw = calculate_aspect_ratio(width, height)
@@ -719,6 +722,8 @@ def get_image_info(filepath):
     return {
         'filename': filepath.name,
         'path': str(filepath.absolute()),
+        'format': image_format,
+        'frames': n_frames,
         'width': width,
         'height': height,
         'orientation': orientation,
@@ -821,6 +826,105 @@ def resize_image(input_path, output_dir, sizes, dimension='width', quality=DEFAU
     return created_files, skipped_sizes
 
 
+def extract_frames(input_path, output_dir):
+    """
+    Extract individual frames from a multi-frame image file.
+
+    Supports MPO, animated GIF, APNG, animated WebP, and multi-page TIFF.
+
+    Args:
+        input_path: Path to input image
+        output_dir: Directory for output frame files
+
+    Returns:
+        List of dicts with path, filename, width, height, size_kb for each frame
+    """
+    input_path = Path(input_path)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    base_name = input_path.stem
+
+    try:
+        img = Image.open(input_path)
+    except Image.DecompressionBombError:
+        raise OSError(
+            f"Image exceeds pixel limit ({MAX_IMAGE_PIXELS:,} pixels) — "
+            "possible decompression bomb"
+        )
+    except Exception as e:
+        raise OSError(f"Cannot read image: {input_path} ({e})") from e
+
+    with img:
+        n_frames = getattr(img, 'n_frames', 1)
+        image_format = img.format
+        pad_width = len(str(n_frames))
+        if pad_width < 3:
+            pad_width = 3
+
+        # Determine output extension based on format
+        if image_format in ('MPO', 'JPEG'):
+            out_ext = '.jpg'
+            save_format = 'JPEG'
+        elif image_format == 'PNG' or image_format == 'APNG':
+            out_ext = '.png'
+            save_format = 'PNG'
+        elif image_format == 'GIF':
+            out_ext = '.png'  # Save GIF frames as PNG to preserve quality
+            save_format = 'PNG'
+        elif image_format == 'WEBP':
+            out_ext = '.png'  # Save WebP frames as PNG to preserve quality
+            save_format = 'PNG'
+        elif image_format == 'TIFF':
+            out_ext = '.tiff'
+            save_format = 'TIFF'
+        else:
+            out_ext = '.png'
+            save_format = 'PNG'
+
+        created_files = []
+
+        for frame_idx in range(n_frames):
+            img.seek(frame_idx)
+
+            # Build output filename with zero-padded numbering
+            frame_num = str(frame_idx + 1).zfill(pad_width)
+            output_filename = f"{base_name}_{frame_num}{out_ext}"
+            output_path = output_dir / output_filename
+
+            # Refuse to write through a symlink output path
+            if output_path.exists() and output_path.is_symlink():
+                print(f"Error: Output path is a symlink — refusing to write: {output_path}",
+                      file=sys.stderr)
+                continue
+
+            # Convert to RGB for JPEG output
+            frame_img = img.copy()
+            if save_format == 'JPEG':
+                frame_img = ensure_rgb_for_jpeg(frame_img)
+
+            # Save frame
+            save_kwargs = {'format': save_format}
+            if save_format == 'JPEG':
+                save_kwargs['quality'] = DEFAULT_CONVERT_QUALITY
+                save_kwargs['optimize'] = True
+
+            frame_img.save(output_path, **save_kwargs)
+
+            file_size = get_file_size_kb(output_path)
+            width, height = frame_img.size
+
+            created_files.append({
+                'path': output_path,
+                'filename': output_filename,
+                'width': width,
+                'height': height,
+                'size_kb': file_size,
+            })
+
+    return created_files
+
+
 def serialize_exif_value(value):
     """Convert EXIF values to JSON-serializable types."""
     if isinstance(value, IFDRational):
@@ -853,6 +957,8 @@ def _format_info_json(info, args):
     output_data = {
         'filename': info['filename'],
         'path': info['path'],
+        'format': info['format'],
+        'frames': info['frames'],
         'width': info['width'],
         'height': info['height'],
         'orientation': info['orientation'],
@@ -882,6 +988,8 @@ def _format_info_csv(info):
     """
     fields = [
         info['filename'],
+        info['format'],
+        str(info['frames']),
         str(info['width']),
         str(info['height']),
         info['orientation'],
@@ -902,6 +1010,9 @@ def _format_info_human(info, args):
     """
     print(f"File: {info['filename']}")
     print(f"Path: {info['path']}")
+    print(f"Format: {info['format']}")
+    if info['frames'] > 1:
+        print(f"Frames: {info['frames']}")
     print(f"Dimensions: {info['width']}x{info['height']}")
     print(f"Orientation: {info['orientation']}")
     print(f"Aspect Ratio: {info['ratio_raw']}", end='')
@@ -956,11 +1067,11 @@ def cmd_resize(args):
     """Handle the resize subcommand."""
     input_path = validate_input_file(args.file)
 
-    # Validate it's a JPEG (content-based check)
+    # Validate it's a JPEG or MPO (content-based check)
     image_format = get_image_format(input_path)
-    if image_format != 'JPEG':
-        print(f"Error: Unsupported format. Version 1.0 supports JPEG only.", file=sys.stderr)
-        print(f"Supported extensions: .jpg, .jpeg, .JPG, .JPEG", file=sys.stderr)
+    if image_format not in ('JPEG', 'MPO'):
+        print(f"Error: Unsupported format. Resize supports JPEG and MPO formats.", file=sys.stderr)
+        print(f"Supported extensions: .jpg, .jpeg, .JPG, .JPEG, .MPO", file=sys.stderr)
         sys.exit(EXIT_UNSUPPORTED_FORMAT)
 
     # Determine dimension and sizes
@@ -1163,6 +1274,18 @@ def cmd_convert(args):
         print(f"Error: Cannot read image: {input_path}", file=sys.stderr)
         sys.exit(EXIT_READ_ERROR)
 
+    # Warn if multi-frame image — only the primary frame will be converted
+    try:
+        with Image.open(input_path) as img:
+            n_frames = getattr(img, 'n_frames', 1)
+            if n_frames > 1:
+                print(f"Warning: {input_path.name} contains {n_frames} frames; "
+                      f"only the primary frame will be converted. "
+                      f"Use 'extract' to export all frames.",
+                      file=sys.stderr)
+    except Exception:
+        pass
+
     # Determine output path
     output_dir = resolve_output_dir(args.output, input_path)
     target_ext = get_target_extension(args.format)
@@ -1191,6 +1314,45 @@ def cmd_convert(args):
     else:
         print(f"Error: Failed to convert image", file=sys.stderr)
         sys.exit(EXIT_READ_ERROR)
+
+
+def cmd_extract(args):
+    """Handle the extract subcommand."""
+    input_path = validate_input_file(args.file)
+
+    # Resolve output directory
+    output_dir = resolve_output_dir(args.output, input_path)
+
+    # Check frame count
+    try:
+        with Image.open(input_path) as img:
+            n_frames = getattr(img, 'n_frames', 1)
+    except Exception as e:
+        print(f"Error: Cannot read image: {input_path}", file=sys.stderr)
+        sys.exit(EXIT_READ_ERROR)
+
+    if n_frames == 1:
+        print(f"Note: {input_path.name} contains only 1 frame.")
+
+    # Extract frames
+    try:
+        created_files = extract_frames(input_path, output_dir)
+    except OSError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(EXIT_READ_ERROR)
+
+    # Print results
+    for file_info in created_files:
+        print(f"Created: {file_info['filename']} "
+              f"({file_info['width']}x{file_info['height']}, "
+              f"{file_info['size_kb']:.0f} KB)")
+
+    # Print summary
+    print()
+    print(f"Extracted {len(created_files)} frame(s) from {input_path.name}")
+
+    # Return list of created file paths for chaining
+    return [str(f['path']) for f in created_files]
 
 
 def main():
@@ -1231,6 +1393,7 @@ def _create_parser():
     _add_resize_parser(subparsers)
     _add_rename_parser(subparsers)
     _add_convert_parser(subparsers)
+    _add_extract_parser(subparsers)
 
     return parser
 
@@ -1302,6 +1465,20 @@ def _add_convert_parser(subparsers):
     convert_parser.add_argument('--strip-exif', action='store_true',
                                 help='Remove EXIF metadata from output')
     convert_parser.set_defaults(func=cmd_convert)
+
+
+def _add_extract_parser(subparsers):
+    """Add the extract subcommand parser."""
+    extract_parser = subparsers.add_parser(
+        'extract',
+        help='Extract frames from multi-frame images',
+        description='Export individual frames from multi-frame image formats '
+                    '(MPO, animated GIF, APNG, animated WebP, multi-page TIFF)'
+    )
+    extract_parser.add_argument('file', help='Path to image file')
+    extract_parser.add_argument('--output', default=None,
+                                help='Output directory (default: output/ next to source file)')
+    extract_parser.set_defaults(func=cmd_extract)
 
 
 def _execute_chain(segments):
