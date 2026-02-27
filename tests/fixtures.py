@@ -155,3 +155,32 @@ EXIF_DATA_NO_DATE = {
     'Model': 'Alpha 7 IV',
     'Orientation': 1,
 }
+
+
+def create_mpo_file(directory, filename='test.mpo',
+                    frame1_size=(800, 600), frame2_size=(800, 600),
+                    frame1_color=(255, 0, 0), frame2_color=(0, 0, 255)):
+    """
+    Create a synthetic MPO (Multi-Picture Object) file with two frames.
+
+    MPO files are JPEG-based containers with multiple images.
+    Pillow can write MPO by saving a JPEG with append_images.
+
+    Args:
+        directory: Directory to save the file in
+        filename: Output filename
+        frame1_size: (width, height) of first frame
+        frame2_size: (width, height) of second frame
+        frame1_color: RGB color of first frame
+        frame2_color: RGB color of second frame
+
+    Returns:
+        Path: Path to created MPO file
+    """
+    frame1 = Image.new('RGB', frame1_size, frame1_color)
+    frame2 = Image.new('RGB', frame2_size, frame2_color)
+
+    filepath = Path(directory) / filename
+    frame1.save(filepath, format='MPO', save_all=True, append_images=[frame2])
+
+    return filepath

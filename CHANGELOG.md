@@ -17,6 +17,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-02-27
+
+### Added
+- **First-class MPO format support** (fixes #17):
+  - MPO files recognized as distinct format (not silently treated as JPEG)
+  - `info` command shows `Format: MPO` and `Frames: N` for multi-frame images
+  - `resize` command accepts MPO files alongside JPEG
+  - `convert` command warns about dropped frames and suggests `extract`
+  - `rename --ext` maps MPO to `.jpg` extension (correct output format)
+  - JSON and CSV output include `format` and `frames` fields
+- **`extract` subcommand** for multi-frame images (closes #18):
+  - Exports individual frames from MPO, animated GIF, APNG, WebP, and TIFF
+  - Output naming: `{basename}_{NNN}.{ext}` with zero-padded numbering
+  - Chainable with other commands via `+` (e.g., `extract + resize --width 400`)
+  - Symlink protection on output paths
+  - Informational note when extracting from single-frame images
+
+### Changed
+- `info --short` (CSV) field order updated: format and frames fields added at positions 2-3
+- Updated version to 1.4.0
+
+---
+
 ## [1.3.1] - 2026-02-12
 
 ### Changed
@@ -173,6 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 1.4.0 | 2026-02-27 | First-class MPO format support, extract subcommand for multi-frame images |
 | 1.3.1 | 2026-02-12 | Refactoring and security hardening (13 findings fixed, 25 security tests) |
 | 1.3.0 | 2026-02-12 | Command chaining with `+`, source-relative output directory |
 | 1.2.1 | 2026-01-12 | Breaking: resize uses positional file arg, Instagram script, project rename |
