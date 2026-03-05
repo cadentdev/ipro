@@ -41,7 +41,7 @@ class TestChainResizeConvert:
         # Convert should have created one WebP file
         converted_files = list(output_convert.glob('*.webp'))
         assert len(converted_files) == 1
-        assert converted_files[0].stem == 'landscape_300'
+        assert converted_files[0].stem == 'landscape'
 
     def test_resize_multiple_then_convert(self, sample_landscape_image, temp_dir):
         """resize with multiple widths + convert: converts each resized file."""

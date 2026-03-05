@@ -46,44 +46,14 @@ A command-line tool for generating multiple resolutions of images to support res
 
 ## Installation
 
-### Prerequisites
-
-- Python 3.8 or higher
-- pip (Python package manager)
-
-### Setup
-
-1. **Clone the repository**:
-
-   ```bash
-   git clone https://github.com/cadentdev/ipro.git
-   cd ipro
-   ```
-
-2. **Create a virtual environment and install dependencies**:
-
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip3 install -r requirements.txt
-   ```
-
-3. **Make the script executable** (optional):
-
-   ```bash
-   chmod +x ipro.py
-   ```
-
-### Install with pipx (recommended)
-
-[pipx](https://pipx.pypa.io/) installs `ipro` in an isolated environment and adds it to your PATH:
+### Install from PyPI (recommended)
 
 ```bash
-# Standard install (uses a snapshot of the code)
-pipx install .
+# With pipx (isolated environment, adds to PATH)
+pipx install ipro-cli
 
-# Editable install (reflects changes to ipro.py immediately — useful for development)
-pipx install --editable .
+# Or with pip
+pip install ipro-cli
 ```
 
 Then run from anywhere:
@@ -95,7 +65,23 @@ ipro --help
 To uninstall:
 
 ```bash
-pipx uninstall ipro
+pipx uninstall ipro-cli
+# or: pip uninstall ipro-cli
+```
+
+### Install from source
+
+For development or to get the latest unreleased changes:
+
+```bash
+git clone https://github.com/cadentdev/ipro.git
+cd ipro
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+
+# Or install with pipx from the local clone
+pipx install .
 ```
 
 ### Troubleshooting Installation

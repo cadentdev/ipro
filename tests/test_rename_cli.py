@@ -93,8 +93,8 @@ class TestRenameExtFlag:
         exit_code, stdout, stderr = run_ipro_rename(fake_heic, '--ext')
 
         assert exit_code == 0
-        # Check that new file was created with .jpg extension
-        expected_output = temp_dir / "photo.jpg"
+        # Check that new file was created with .jpg extension in renamed/ subdir
+        expected_output = temp_dir / "renamed" / "photo.jpg"
         assert expected_output.exists()
         # Original should still exist (non-destructive)
         assert fake_heic.exists()
@@ -111,9 +111,9 @@ class TestRenameExtFlag:
         assert exit_code == 0
         # On case-insensitive filesystems (macOS, Windows), photo.jpg and photo.JPG
         # are the same file. The command should succeed either way.
-        expected_output = temp_dir / "photo.jpg"
+        expected_output = temp_dir / "renamed" / "photo.jpg"
         # Check that a file with the correct name exists (case-insensitive check)
-        matching_files = list(temp_dir.glob("photo.[jJ][pP][gG]"))
+        matching_files = list((temp_dir / "renamed").glob("photo.[jJ][pP][gG]"))
         assert len(matching_files) >= 1
 
     def test_ext_creates_copy_not_moves(self, temp_dir):
@@ -126,8 +126,8 @@ class TestRenameExtFlag:
 
         # Original should still exist
         assert original.exists()
-        # New file should also exist
-        assert (temp_dir / "photo.jpg").exists()
+        # New file should also exist in renamed/ subdir
+        assert (temp_dir / "renamed" / "photo.jpg").exists()
 
     def test_ext_png_keeps_png_extension(self, sample_png_image):
         """Test that PNG file gets .png extension."""
@@ -136,7 +136,7 @@ class TestRenameExtFlag:
         assert exit_code == 0
         # File already has correct extension, should report no change needed
         # or the file should exist
-        expected_output = sample_png_image.parent / "test.png"
+        expected_output = sample_png_image.parent / "renamed" / "test.png"
         assert expected_output.exists()
         # Output should indicate no change or success
         combined = stdout + stderr
@@ -165,10 +165,10 @@ class TestRenamePrefixExifDate:
         )
 
         assert exit_code == 0
-        # Check that new file was created with date prefix
+        # Check that new file was created with date prefix in renamed/ subdir
         parent_dir = sample_image_with_exif.parent
         # The fixture uses EXIF_DATA_FULL which has date "2024:11:12 14:30:00"
-        expected_output = parent_dir / "2024-11-12T143000_with_exif.jpg"
+        expected_output = parent_dir / "renamed" / "2024-11-12T143000_with_exif.jpg"
         assert expected_output.exists()
 
     def test_prefix_exif_date_no_colons_in_output(self, sample_image_with_exif):
@@ -178,10 +178,10 @@ class TestRenamePrefixExifDate:
         )
 
         assert exit_code == 0
-        parent_dir = sample_image_with_exif.parent
+        parent_dir = sample_image_with_exif.parent / "renamed"
         # Find the new file
         new_files = [f for f in parent_dir.iterdir()
-                     if f.name.startswith('2024-') and f.name != sample_image_with_exif.name]
+                     if f.name.startswith('2024-')]
         assert len(new_files) == 1
         # Filename should not contain colons
         assert ':' not in new_files[0].name
@@ -235,7 +235,7 @@ class TestRenameCombinedFlags:
         assert exit_code == 0
         # Should have date prefix AND corrected extension
         # EXIF_DATA_FULL has date "2024:11:12 14:30:00"
-        expected = temp_dir / "2024-11-12T143000_photo.jpg"
+        expected = temp_dir / "renamed" / "2024-11-12T143000_photo.jpg"
         assert expected.exists()
 
     def test_combined_flags_order_independent(self, temp_dir):
@@ -255,7 +255,7 @@ class TestRenameCombinedFlags:
         )
 
         assert exit_code == 0
-        expected = temp_dir / "2024-11-12T143000_test.jpg"
+        expected = temp_dir / "renamed" / "2024-11-12T143000_test.jpg"
         assert expected.exists()
 
 
@@ -346,7 +346,7 @@ class TestRenameEdgeCases:
         exit_code, stdout, stderr = run_ipro_rename(original, '--ext')
 
         assert exit_code == 0
-        expected = temp_dir / "my photo.jpg"
+        expected = temp_dir / "renamed" / "my photo.jpg"
         assert expected.exists()
 
     def test_filename_with_multiple_dots(self, temp_dir):
@@ -358,7 +358,7 @@ class TestRenameEdgeCases:
         exit_code, stdout, stderr = run_ipro_rename(original, '--ext')
 
         assert exit_code == 0
-        expected = temp_dir / "photo.backup.jpg"
+        expected = temp_dir / "renamed" / "photo.backup.jpg"
         assert expected.exists()
 
     def test_output_file_already_exists(self, temp_dir):
@@ -367,8 +367,10 @@ class TestRenameEdgeCases:
         original = temp_dir / "photo.HEIC"
         img.save(original, 'JPEG')
 
-        # Create existing output file
-        existing = temp_dir / "photo.jpg"
+        # Create existing output file in renamed/ subdir
+        renamed_dir = temp_dir / "renamed"
+        renamed_dir.mkdir()
+        existing = renamed_dir / "photo.jpg"
         existing.write_text("existing content")
 
         exit_code, stdout, stderr = run_ipro_rename(original, '--ext')
@@ -390,5 +392,5 @@ class TestRenameEdgeCases:
         exit_code, stdout, stderr = run_ipro_rename(original, '--ext')
 
         assert exit_code == 0
-        expected = temp_dir / "фото.jpg"
+        expected = temp_dir / "renamed" / "фото.jpg"
         assert expected.exists()

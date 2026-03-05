@@ -186,7 +186,7 @@ class TestConvertOutputDirectory:
 
             assert result.returncode == 0
             # Output should be next to source file, not in cwd
-            expected = src_dir / "output" / "test.png"
+            expected = src_dir / "converted" / "test.png"
             assert expected.exists()
 
     def test_custom_output_directory(self, sample_square_image, temp_dir):

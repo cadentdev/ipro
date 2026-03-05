@@ -97,12 +97,12 @@ class TestResizeByWidth:
         )
 
         assert exit_code == 0
-        assert 'test_300.jpg' in stdout
+        assert 'test.jpg' in stdout
         assert '300x200' in stdout
         assert 'Successfully created 1 image' in stdout
 
         # Verify file was created
-        output_file = output_dir / 'test_300.jpg'
+        output_file = output_dir / 'test.jpg'
         assert output_file.exists()
 
         # Verify dimensions
@@ -147,11 +147,11 @@ class TestResizeByHeight:
         )
 
         assert exit_code == 0
-        assert 'test_400.jpg' in stdout
+        assert 'test.jpg' in stdout
         assert '600x400' in stdout  # Maintains aspect ratio
 
         # Verify file and dimensions
-        output_file = output_dir / 'test_400.jpg'
+        output_file = output_dir / 'test.jpg'
         assert output_file.exists()
 
         with Image.open(output_file) as img:
@@ -321,8 +321,8 @@ class TestResizeOutputHandling:
             assert result.returncode == 0
             assert 'Output directory:' in result.stdout
 
-            # Verify file was created in output/ next to source, not in cwd
-            assert (src_dir / 'output' / 'test_300.jpg').exists()
+            # Verify file was created in resized-300w/ next to source, not in cwd
+            assert (src_dir / 'resized-300w' / 'test.jpg').exists()
         finally:
             os.chdir(old_cwd)
 
@@ -341,7 +341,7 @@ class TestResizeOutputHandling:
         assert str(output_dir) in stdout
 
         # Verify file was created in custom directory
-        assert (output_dir / 'test_300.jpg').exists()
+        assert (output_dir / 'test.jpg').exists()
 
     def test_resize_creates_output_directory(self, temp_dir):
         """Test that output directory is created if it doesn't exist."""
@@ -358,7 +358,7 @@ class TestResizeOutputHandling:
 
         assert exit_code == 0
         assert output_dir.exists()
-        assert (output_dir / 'test_300.jpg').exists()
+        assert (output_dir / 'test.jpg').exists()
 
 
 class TestResizeExitCodes:

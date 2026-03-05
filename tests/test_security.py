@@ -143,7 +143,7 @@ class TestSymlinkProtection:
         symlink_dir.symlink_to(real_dir)
 
         with pytest.raises(SystemExit) as exc_info:
-            resolve_output_dir(str(symlink_dir), sample_square_image)
+            resolve_output_dir(str(symlink_dir), sample_square_image, "converted")
         assert exc_info.value.code == EXIT_INVALID_ARGS
 
     def test_validate_input_file_warns_on_symlink(self, temp_dir, capsys):

@@ -25,7 +25,7 @@ except ImportError:
     pass  # pillow-heif not installed, HEIF support unavailable
 
 
-__version__ = "1.5.0"
+__version__ = "1.6.0"
 
 # Exit codes
 EXIT_SUCCESS = 0
@@ -46,8 +46,25 @@ Image.MAX_IMAGE_PIXELS = MAX_IMAGE_PIXELS
 DEFAULT_RESIZE_QUALITY = 90
 DEFAULT_CONVERT_QUALITY = 80
 
-# Output directory
-DEFAULT_OUTPUT_DIR = "output"
+# Known ipro output directory names for chain detection
+IPRO_OUTPUT_DIRS = {'converted', 'renamed', 'extracted', 'output'}
+
+
+def is_ipro_output_dir(dirname):
+    """Check if a directory name is a known ipro output directory."""
+    return dirname in IPRO_OUTPUT_DIRS or dirname.startswith('resized')
+
+
+def get_resize_dir_name(sizes, dimension):
+    """Compute the default output directory name for resize.
+
+    Single size: resized-{size}w or resized-{size}h
+    Multiple sizes: resized
+    """
+    if len(sizes) == 1:
+        suffix = 'w' if dimension == 'width' else 'h'
+        return f"resized-{sizes[0]}{suffix}"
+    return "resized"
 
 # Supported output formats for convert command
 SUPPORTED_OUTPUT_FORMATS = {
@@ -180,18 +197,19 @@ def validate_output_path(output_str, input_path):
     return resolved
 
 
-def resolve_output_dir(args_output, input_path):
+def resolve_output_dir(args_output, input_path, default_dir_name):
     """
-    Resolve the output directory from CLI args and input path.
+    Resolve the output directory from CLI args, input path, and subcommand default.
 
     If args_output is provided, use it (with security validation).
-    If the input is already in an "output" directory (e.g., from chaining),
-    reuse that directory. Otherwise, create an "output" subdirectory next
-    to the source file.
+    If the input is already in an ipro output directory (chaining), go up one
+    level and create default_dir_name as a sibling.
+    Otherwise, create default_dir_name next to the source file.
 
     Args:
         args_output: The --output argument value (str or None)
         input_path: Path object of the input file
+        default_dir_name: Subcommand-specific default dir name (e.g., "converted")
 
     Returns:
         Path object for the output directory
@@ -204,10 +222,11 @@ def resolve_output_dir(args_output, input_path):
             print("Error: Output directory is a symlink — refusing to write", file=sys.stderr)
             sys.exit(EXIT_INVALID_ARGS)
         return output_path
-    elif input_path.parent.name == DEFAULT_OUTPUT_DIR:
-        return input_path.parent
+    elif is_ipro_output_dir(input_path.parent.name):
+        # Chaining: place output as sibling of previous output dir
+        return input_path.parent.parent / default_dir_name
     else:
-        return input_path.parent / DEFAULT_OUTPUT_DIR
+        return input_path.parent / default_dir_name
 
 
 def validate_input_file(filepath):
@@ -737,7 +756,7 @@ def get_image_info(filepath):
     }
 
 
-def resize_image(input_path, output_dir, sizes, dimension='width', quality=DEFAULT_RESIZE_QUALITY):
+def resize_image(input_path, output_dir, sizes, dimension='width', quality=DEFAULT_RESIZE_QUALITY, preserve_filename=False):
     """
     Resize an image to multiple sizes.
 
@@ -797,7 +816,10 @@ def resize_image(input_path, output_dir, sizes, dimension='width', quality=DEFAU
             resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
             # Prepare output filename
-            output_filename = f"{base_name}_{size}{extension}"
+            if preserve_filename:
+                output_filename = f"{base_name}{extension}"
+            else:
+                output_filename = f"{base_name}_{size}{extension}"
             output_path = output_dir / output_filename
 
             # Refuse to write through a symlink output path
@@ -1102,7 +1124,8 @@ def cmd_resize(args):
         sys.exit(EXIT_READ_ERROR)
 
     # Resolve output directory
-    output_dir = resolve_output_dir(args.output, input_path)
+    dir_name = get_resize_dir_name(sizes, dimension)
+    output_dir = resolve_output_dir(args.output, input_path, dir_name)
 
     # Print processing info
     print(f"Processing: {input_path.name} ({orig_width}x{orig_height})")
@@ -1116,7 +1139,8 @@ def cmd_resize(args):
             output_dir,
             sizes,
             dimension=dimension,
-            quality=args.quality
+            quality=args.quality,
+            preserve_filename=(len(sizes) == 1),
         )
     except OSError as e:
         print(f"Error: {e}", file=sys.stderr)
@@ -1192,12 +1216,8 @@ def cmd_rename(args):
     )
 
     # Determine output directory
-    if args.output:
-        output_dir = Path(args.output)
-        # Create directory if it doesn't exist
-        output_dir.mkdir(parents=True, exist_ok=True)
-    else:
-        output_dir = input_path.parent
+    output_dir = resolve_output_dir(args.output, input_path, "renamed")
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # Build output path
     output_path = output_dir / new_filename
@@ -1287,7 +1307,7 @@ def cmd_convert(args):
         pass
 
     # Determine output path
-    output_dir = resolve_output_dir(args.output, input_path)
+    output_dir = resolve_output_dir(args.output, input_path, "converted")
     target_ext = get_target_extension(args.format)
     output_filename = input_path.stem + target_ext
     output_path = output_dir / output_filename
@@ -1321,7 +1341,7 @@ def cmd_extract(args):
     input_path = validate_input_file(args.file)
 
     # Resolve output directory
-    output_dir = resolve_output_dir(args.output, input_path)
+    output_dir = resolve_output_dir(args.output, input_path, "extracted")
 
     # Check frame count
     try:
@@ -1426,7 +1446,7 @@ def _add_resize_parser(subparsers):
                                help='Comma-separated list of target heights (e.g., 400,800)')
     resize_parser.add_argument('file', help='Path to input image file')
     resize_parser.add_argument('--output', default=None,
-                               help='Output directory (default: output/ next to source file)')
+                               help='Output directory (default: resized-{size}{w|h}/ or resized/)')
     resize_parser.add_argument('--quality', type=int, default=DEFAULT_RESIZE_QUALITY,
                                help=f'JPEG quality 1-100 (default: {DEFAULT_RESIZE_QUALITY})')
     resize_parser.set_defaults(func=cmd_resize)
@@ -1444,7 +1464,7 @@ def _add_rename_parser(subparsers):
                                help='Correct file extension based on actual image format')
     rename_parser.add_argument('--prefix-exif-date', action='store_true',
                                help='Prepend EXIF date to filename (format: YYYY-MM-DDTHHMMSS_)')
-    rename_parser.add_argument('--output', help='Output directory (default: same as source file)')
+    rename_parser.add_argument('--output', help='Output directory (default: renamed/)')
     rename_parser.set_defaults(func=cmd_rename)
 
 
@@ -1459,7 +1479,7 @@ def _add_convert_parser(subparsers):
     convert_parser.add_argument('--format', '-f', required=True,
                                 help='Target format (jpeg, jpg, png, webp)')
     convert_parser.add_argument('--output', default=None,
-                                help='Output directory (default: output/ next to source file)')
+                                help='Output directory (default: converted/)')
     convert_parser.add_argument('--quality', type=int, default=DEFAULT_CONVERT_QUALITY,
                                 help=f'JPEG quality 1-100 (default: {DEFAULT_CONVERT_QUALITY})')
     convert_parser.add_argument('--strip-exif', action='store_true',
@@ -1477,7 +1497,7 @@ def _add_extract_parser(subparsers):
     )
     extract_parser.add_argument('file', help='Path to image file')
     extract_parser.add_argument('--output', default=None,
-                                help='Output directory (default: output/ next to source file)')
+                                help='Output directory (default: extracted/)')
     extract_parser.set_defaults(func=cmd_extract)
 
 

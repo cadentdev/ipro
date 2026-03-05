@@ -294,9 +294,9 @@ class TestCmdResizeDirect:
         cmd_resize(args)
 
         captured = capsys.readouterr()
-        assert 'test_300.jpg' in captured.out
+        assert 'test.jpg' in captured.out
         assert 'Successfully created 1 image' in captured.out
-        assert (output_dir / 'test_300.jpg').exists()
+        assert (output_dir / 'test.jpg').exists()
 
     def test_cmd_resize_multiple_widths(self, temp_dir, capsys):
         """Test cmd_resize with multiple widths."""
@@ -338,7 +338,7 @@ class TestCmdResizeDirect:
         cmd_resize(args)
 
         captured = capsys.readouterr()
-        assert 'test_400.jpg' in captured.out
+        assert 'test.jpg' in captured.out
         assert '600x400' in captured.out
 
     def test_cmd_resize_file_not_found(self, temp_dir):
@@ -636,7 +636,7 @@ class TestMainFunction:
         main()
 
         captured = capsys.readouterr()
-        assert 'test_300.jpg' in captured.out
+        assert 'test.jpg' in captured.out
 
     def test_main_resize_help(self, monkeypatch, capsys):
         """Test main with resize --help."""
