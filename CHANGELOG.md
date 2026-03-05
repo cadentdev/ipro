@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to ImgPro will be documented in this file.
+All notable changes to ipro will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Custom field selection for `imgpro info` command
+- Custom field selection for `ipro info` command
 - AVIF output format support
 - `--no-srgb` flag for convert command
 - `--verbose` and `--quiet` modes
@@ -75,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Command chaining** with `+` separator: output of each command feeds into the next
-  - `imgpro convert photo.heic --format jpeg + resize --width 1080`
+  - `ipro convert photo.heic --format jpeg + resize --width 1080`
   - Multi-file fan-out: resize with multiple widths chains each output individually
 - **Source-relative output directory**: default `output/` is created next to the source file, not CWD
   - Chained commands reuse the output directory when input is already in `output/`
@@ -90,8 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **BREAKING**: Resize command now uses positional `<file>` argument instead of `--input` flag
-  - Before: `imgpro resize --input photo.jpg --width 300`
-  - After: `imgpro resize photo.jpg --width 300`
+  - Before: `ipro resize --input photo.jpg --width 300`
+  - After: `ipro resize photo.jpg --width 300`
   - Aligns resize command with other commands (info, rename, convert) per PRD specification
 
 ### Added
@@ -100,7 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DONE.md` - Archive file for completed development tasks
 
 ### Fixed
-- Renamed project from `imagepro` to `imgpro` for consistency
+- Renamed project from `imagepro` to `ipro` for consistency
 
 ### Documentation
 - Updated README with improved formatting and consistency
@@ -113,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2025-12-06
 
 ### Added
-- **WebP output format support** for `imgpro convert` command
+- **WebP output format support** for `ipro convert` command
 - **Batch processing scripts** in `scripts/` directory:
   - `rename-all.sh` - Add EXIF date prefix and correct extensions
   - `convert-all.sh` - Convert images to JPEG with sRGB profile
@@ -150,8 +150,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-11-12
 
 ### Added
-- Initial release of ImgPro CLI tool
-- `imgpro info` subcommand for image metadata inspection
+- Initial release of ipro CLI tool
+- `ipro info` subcommand for image metadata inspection
   - Pixel dimensions with EXIF orientation handling
   - Orientation classification (portrait, landscape, square)
   - Aspect ratio calculation using GCD
@@ -160,7 +160,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - EXIF extraction with curated subset (date taken, camera make/model, DPI)
   - Three output formats: default (human-readable), `--json`, `--short` (CSV)
   - `--exif` and `--exif-all` flags for EXIF data display
-- `imgpro resize` subcommand for responsive image generation
+- `ipro resize` subcommand for responsive image generation
   - Width-based resizing with `--width` option
   - Height-based resizing with `--height` option
   - Aspect ratio preservation
@@ -185,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 4: Cannot read/process image
 
 ### Technical Details
-- Single-file architecture (`imgpro.py`)
+- Single-file architecture (`ipro.py`)
 - Python 3.8+ requirement
 - Pillow dependency for image processing
 - argparse subcommand pattern for CLI routing

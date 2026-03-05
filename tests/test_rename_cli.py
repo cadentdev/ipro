@@ -1,4 +1,4 @@
-"""CLI integration tests for imgpro rename command."""
+"""CLI integration tests for ipro rename command."""
 
 import pytest
 import subprocess
@@ -7,9 +7,9 @@ from pathlib import Path
 from PIL import Image
 
 
-def run_imgpro_rename(filepath, *args):
+def run_ipro_rename(filepath, *args):
     """
-    Run imgpro rename command and return result.
+    Run ipro rename command and return result.
 
     Args:
         filepath: Path to image file
@@ -18,7 +18,7 @@ def run_imgpro_rename(filepath, *args):
     Returns:
         tuple: (exit_code, stdout, stderr)
     """
-    cmd = [sys.executable, 'imgpro.py', 'rename', str(filepath)] + list(args)
+    cmd = [sys.executable, 'ipro.py', 'rename', str(filepath)] + list(args)
     result = subprocess.run(
         cmd,
         capture_output=True,
@@ -33,7 +33,7 @@ class TestRenameCommandBasics:
 
     def test_rename_command_exists(self):
         """Test that rename subcommand is recognized."""
-        cmd = [sys.executable, 'imgpro.py', 'rename', '--help']
+        cmd = [sys.executable, 'ipro.py', 'rename', '--help']
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -46,7 +46,7 @@ class TestRenameCommandBasics:
 
     def test_rename_requires_file_argument(self):
         """Test that rename command requires a file argument."""
-        cmd = [sys.executable, 'imgpro.py', 'rename']
+        cmd = [sys.executable, 'ipro.py', 'rename']
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -58,7 +58,7 @@ class TestRenameCommandBasics:
 
     def test_rename_requires_action_flag(self, sample_square_image):
         """Test that rename requires at least --ext or --prefix-exif-date."""
-        exit_code, stdout, stderr = run_imgpro_rename(sample_square_image)
+        exit_code, stdout, stderr = run_ipro_rename(sample_square_image)
         # Should fail because no action flag provided
         assert exit_code != 0
         assert 'ext' in stderr.lower() or 'prefix' in stderr.lower() or 'required' in stderr.lower()
@@ -66,7 +66,7 @@ class TestRenameCommandBasics:
     def test_rename_file_not_found(self, temp_dir):
         """Test error handling for non-existent file."""
         fake_file = temp_dir / 'does_not_exist.jpg'
-        exit_code, stdout, stderr = run_imgpro_rename(fake_file, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(fake_file, '--ext')
 
         # Should exit with code 3 (file not found)
         assert exit_code == 3
@@ -74,7 +74,7 @@ class TestRenameCommandBasics:
 
     def test_rename_unsupported_file(self, sample_non_image_file):
         """Test error handling for non-image file."""
-        exit_code, stdout, stderr = run_imgpro_rename(sample_non_image_file, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(sample_non_image_file, '--ext')
 
         # Should exit with code 4 (cannot read)
         assert exit_code == 4
@@ -90,7 +90,7 @@ class TestRenameExtFlag:
         fake_heic = temp_dir / "photo.HEIC"
         img.save(fake_heic, 'JPEG')
 
-        exit_code, stdout, stderr = run_imgpro_rename(fake_heic, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(fake_heic, '--ext')
 
         assert exit_code == 0
         # Check that new file was created with .jpg extension
@@ -106,7 +106,7 @@ class TestRenameExtFlag:
         uppercase_jpg = temp_dir / "photo.JPG"
         img.save(uppercase_jpg, 'JPEG')
 
-        exit_code, stdout, stderr = run_imgpro_rename(uppercase_jpg, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(uppercase_jpg, '--ext')
 
         assert exit_code == 0
         # On case-insensitive filesystems (macOS, Windows), photo.jpg and photo.JPG
@@ -122,7 +122,7 @@ class TestRenameExtFlag:
         original = temp_dir / "photo.HEIC"
         img.save(original, 'JPEG')
 
-        run_imgpro_rename(original, '--ext')
+        run_ipro_rename(original, '--ext')
 
         # Original should still exist
         assert original.exists()
@@ -131,7 +131,7 @@ class TestRenameExtFlag:
 
     def test_ext_png_keeps_png_extension(self, sample_png_image):
         """Test that PNG file gets .png extension."""
-        exit_code, stdout, stderr = run_imgpro_rename(sample_png_image, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(sample_png_image, '--ext')
 
         assert exit_code == 0
         # File already has correct extension, should report no change needed
@@ -148,7 +148,7 @@ class TestRenameExtFlag:
         original = temp_dir / "photo.HEIC"
         img.save(original, 'JPEG')
 
-        exit_code, stdout, stderr = run_imgpro_rename(original, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(original, '--ext')
 
         assert exit_code == 0
         # Should mention both original and new filename
@@ -160,7 +160,7 @@ class TestRenamePrefixExifDate:
 
     def test_prefix_exif_date_adds_prefix(self, sample_image_with_exif):
         """Test that --prefix-exif-date adds date prefix."""
-        exit_code, stdout, stderr = run_imgpro_rename(
+        exit_code, stdout, stderr = run_ipro_rename(
             sample_image_with_exif, '--prefix-exif-date'
         )
 
@@ -173,7 +173,7 @@ class TestRenamePrefixExifDate:
 
     def test_prefix_exif_date_no_colons_in_output(self, sample_image_with_exif):
         """Test that date prefix contains no colons (macOS-safe)."""
-        exit_code, stdout, stderr = run_imgpro_rename(
+        exit_code, stdout, stderr = run_ipro_rename(
             sample_image_with_exif, '--prefix-exif-date'
         )
 
@@ -188,7 +188,7 @@ class TestRenamePrefixExifDate:
 
     def test_prefix_exif_date_skips_no_exif(self, sample_image_no_exif):
         """Test that --prefix-exif-date skips files without EXIF date."""
-        exit_code, stdout, stderr = run_imgpro_rename(
+        exit_code, stdout, stderr = run_ipro_rename(
             sample_image_no_exif, '--prefix-exif-date'
         )
 
@@ -206,7 +206,7 @@ class TestRenamePrefixExifDate:
     def test_prefix_exif_date_preserves_original(self, sample_image_with_exif):
         """Test that original file is preserved."""
         original_exists_before = sample_image_with_exif.exists()
-        run_imgpro_rename(sample_image_with_exif, '--prefix-exif-date')
+        run_ipro_rename(sample_image_with_exif, '--prefix-exif-date')
 
         assert original_exists_before
         assert sample_image_with_exif.exists()
@@ -228,7 +228,7 @@ class TestRenameCombinedFlags:
         )
         # Re-save as JPEG (the fixture creates JPEG internally)
 
-        exit_code, stdout, stderr = run_imgpro_rename(
+        exit_code, stdout, stderr = run_ipro_rename(
             img_path, '--ext', '--prefix-exif-date'
         )
 
@@ -250,7 +250,7 @@ class TestRenameCombinedFlags:
         )
 
         # Try with reversed order
-        exit_code, stdout, stderr = run_imgpro_rename(
+        exit_code, stdout, stderr = run_ipro_rename(
             img_path, '--prefix-exif-date', '--ext'
         )
 
@@ -272,7 +272,7 @@ class TestRenameOutputDirectory:
         output_dir = temp_dir / "renamed"
         output_dir.mkdir()
 
-        exit_code, stdout, stderr = run_imgpro_rename(
+        exit_code, stdout, stderr = run_ipro_rename(
             original, '--ext', '--output', str(output_dir)
         )
 
@@ -290,7 +290,7 @@ class TestRenameOutputDirectory:
         output_dir = temp_dir / "new_output_dir"
         assert not output_dir.exists()
 
-        exit_code, stdout, stderr = run_imgpro_rename(
+        exit_code, stdout, stderr = run_ipro_rename(
             sample_square_image, '--ext', '--output', str(output_dir)
         )
 
@@ -308,26 +308,26 @@ class TestRenameExitCodes:
         original = temp_dir / "photo.HEIC"
         img.save(original, 'JPEG')
 
-        exit_code, _, _ = run_imgpro_rename(original, '--ext')
+        exit_code, _, _ = run_ipro_rename(original, '--ext')
         assert exit_code == 0
 
     def test_file_not_found_exit_code(self, temp_dir):
         """Test file not found returns exit code 3."""
-        exit_code, _, _ = run_imgpro_rename(
+        exit_code, _, _ = run_ipro_rename(
             temp_dir / "nonexistent.jpg", '--ext'
         )
         assert exit_code == 3
 
     def test_cannot_read_exit_code(self, sample_non_image_file):
         """Test unreadable file returns exit code 4."""
-        exit_code, _, _ = run_imgpro_rename(
+        exit_code, _, _ = run_ipro_rename(
             sample_non_image_file, '--ext'
         )
         assert exit_code == 4
 
     def test_skip_no_exif_date_still_success(self, sample_image_no_exif):
         """Test that skipping file due to no EXIF date still returns 0."""
-        exit_code, _, _ = run_imgpro_rename(
+        exit_code, _, _ = run_ipro_rename(
             sample_image_no_exif, '--prefix-exif-date'
         )
         # Should be 0 (skip with warning, not error)
@@ -343,7 +343,7 @@ class TestRenameEdgeCases:
         original = temp_dir / "my photo.HEIC"
         img.save(original, 'JPEG')
 
-        exit_code, stdout, stderr = run_imgpro_rename(original, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(original, '--ext')
 
         assert exit_code == 0
         expected = temp_dir / "my photo.jpg"
@@ -355,7 +355,7 @@ class TestRenameEdgeCases:
         original = temp_dir / "photo.backup.HEIC"
         img.save(original, 'JPEG')
 
-        exit_code, stdout, stderr = run_imgpro_rename(original, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(original, '--ext')
 
         assert exit_code == 0
         expected = temp_dir / "photo.backup.jpg"
@@ -371,7 +371,7 @@ class TestRenameEdgeCases:
         existing = temp_dir / "photo.jpg"
         existing.write_text("existing content")
 
-        exit_code, stdout, stderr = run_imgpro_rename(original, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(original, '--ext')
 
         # Should overwrite with warning (or could fail - depends on design)
         # For now, let's say it should succeed and overwrite
@@ -387,7 +387,7 @@ class TestRenameEdgeCases:
         original = temp_dir / "фото.HEIC"  # Russian word for "photo"
         img.save(original, 'JPEG')
 
-        exit_code, stdout, stderr = run_imgpro_rename(original, '--ext')
+        exit_code, stdout, stderr = run_ipro_rename(original, '--ext')
 
         assert exit_code == 0
         expected = temp_dir / "фото.jpg"

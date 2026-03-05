@@ -13,7 +13,7 @@
 #   output_dir - Optional output directory (default: ./resized/)
 #
 # Notes:
-#   - Only processes JPEG files (imgpro resize limitation)
+#   - Only processes JPEG files (ipro resize limitation)
 #   - Skips files that are already smaller than target width
 #   - Uses || true to continue on errors
 
@@ -21,7 +21,7 @@ set -e
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-IMGPRO="$SCRIPT_DIR/../imgpro.py"
+IMGPRO="$SCRIPT_DIR/../ipro.py"
 
 # Check arguments
 if [ $# -lt 2 ]; then
@@ -48,9 +48,9 @@ if [ ! -d "$INPUT_DIR" ]; then
     exit 1
 fi
 
-# Check if imgpro.py exists
+# Check if ipro.py exists
 if [ ! -f "$IMGPRO" ]; then
-    echo "Error: imgpro.py not found at: $IMGPRO" >&2
+    echo "Error: ipro.py not found at: $IMGPRO" >&2
     exit 1
 fi
 

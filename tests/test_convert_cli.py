@@ -1,4 +1,4 @@
-"""CLI integration tests for imgpro convert command."""
+"""CLI integration tests for ipro convert command."""
 
 import pytest
 import subprocess
@@ -7,9 +7,9 @@ from pathlib import Path
 from PIL import Image
 
 
-def run_imgpro_convert(filepath, *args):
+def run_ipro_convert(filepath, *args):
     """
-    Run imgpro convert command and return result.
+    Run ipro convert command and return result.
 
     Args:
         filepath: Path to image file
@@ -18,7 +18,7 @@ def run_imgpro_convert(filepath, *args):
     Returns:
         tuple: (exit_code, stdout, stderr)
     """
-    cmd = [sys.executable, 'imgpro.py', 'convert', str(filepath)] + list(args)
+    cmd = [sys.executable, 'ipro.py', 'convert', str(filepath)] + list(args)
     result = subprocess.run(
         cmd,
         capture_output=True,
@@ -33,7 +33,7 @@ class TestConvertCommandBasics:
 
     def test_convert_command_exists(self):
         """Test that convert subcommand is recognized."""
-        cmd = [sys.executable, 'imgpro.py', 'convert', '--help']
+        cmd = [sys.executable, 'ipro.py', 'convert', '--help']
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -45,7 +45,7 @@ class TestConvertCommandBasics:
 
     def test_convert_requires_file_argument(self):
         """Test that convert command requires a file argument."""
-        cmd = [sys.executable, 'imgpro.py', 'convert', '--format', 'jpeg']
+        cmd = [sys.executable, 'ipro.py', 'convert', '--format', 'jpeg']
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -56,14 +56,14 @@ class TestConvertCommandBasics:
 
     def test_convert_requires_format_option(self, sample_square_image):
         """Test that convert requires --format option."""
-        exit_code, stdout, stderr = run_imgpro_convert(sample_square_image)
+        exit_code, stdout, stderr = run_ipro_convert(sample_square_image)
         assert exit_code != 0
         assert 'format' in stderr.lower() or 'required' in stderr.lower()
 
     def test_convert_file_not_found(self, temp_dir):
         """Test error handling for non-existent file."""
         fake_file = temp_dir / 'does_not_exist.jpg'
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             fake_file, '--format', 'png'
         )
         assert exit_code == 3
@@ -71,7 +71,7 @@ class TestConvertCommandBasics:
 
     def test_convert_unsupported_file(self, sample_non_image_file):
         """Test error handling for non-image file."""
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_non_image_file, '--format', 'png'
         )
         assert exit_code == 4
@@ -83,7 +83,7 @@ class TestConvertFormatOption:
     def test_convert_to_png(self, sample_square_image, temp_dir):
         """Test converting to PNG format."""
         output_dir = temp_dir / "converted"
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'png', '--output', str(output_dir)
         )
 
@@ -98,7 +98,7 @@ class TestConvertFormatOption:
     def test_convert_to_jpeg(self, sample_png_image, temp_dir):
         """Test converting to JPEG format."""
         output_dir = temp_dir / "converted"
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_png_image, '--format', 'jpeg', '--output', str(output_dir)
         )
 
@@ -111,7 +111,7 @@ class TestConvertFormatOption:
     def test_convert_jpg_alias(self, sample_png_image, temp_dir):
         """Test that 'jpg' works as format alias."""
         output_dir = temp_dir / "converted"
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_png_image, '--format', 'jpg', '--output', str(output_dir)
         )
 
@@ -122,7 +122,7 @@ class TestConvertFormatOption:
     def test_convert_to_webp(self, sample_square_image, temp_dir):
         """Test converting to WebP format."""
         output_dir = temp_dir / "converted"
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'webp', '--output', str(output_dir)
         )
 
@@ -135,7 +135,7 @@ class TestConvertFormatOption:
     def test_convert_to_webp_with_quality(self, sample_png_image, temp_dir):
         """Test converting to WebP with quality option."""
         output_dir = temp_dir / "converted"
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_png_image, '--format', 'webp', '--quality', '85',
             '--output', str(output_dir)
         )
@@ -146,7 +146,7 @@ class TestConvertFormatOption:
 
     def test_convert_unsupported_target_format(self, sample_square_image):
         """Test error for unsupported target format."""
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'xyz'
         )
         assert exit_code != 0
@@ -155,7 +155,7 @@ class TestConvertFormatOption:
     def test_convert_uppercase_format(self, sample_png_image, temp_dir):
         """Test that uppercase format names work."""
         output_dir = temp_dir / "converted"
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_png_image, '--format', 'JPEG', '--output', str(output_dir)
         )
 
@@ -180,7 +180,7 @@ class TestConvertOutputDirectory:
             src = src_dir / "test.jpg"
             shutil.copy(sample_square_image, src)
 
-            cmd = [sys.executable, str(Path(__file__).parent.parent / 'imgpro.py'),
+            cmd = [sys.executable, str(Path(__file__).parent.parent / 'ipro.py'),
                    'convert', str(src), '--format', 'png']
             result = subprocess.run(cmd, capture_output=True, text=True, cwd=tmpdir)
 
@@ -193,7 +193,7 @@ class TestConvertOutputDirectory:
         """Test --output option specifies custom directory."""
         output_dir = temp_dir / "my_output"
 
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'png', '--output', str(output_dir)
         )
 
@@ -206,7 +206,7 @@ class TestConvertOutputDirectory:
         output_dir = temp_dir / "new_dir" / "nested"
         assert not output_dir.exists()
 
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'png', '--output', str(output_dir)
         )
 
@@ -221,7 +221,7 @@ class TestConvertQualityOption:
         """Test quality option for JPEG output."""
         output_dir = temp_dir / "converted"
 
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_png_image, '--format', 'jpeg', '--quality', '75',
             '--output', str(output_dir)
         )
@@ -232,7 +232,7 @@ class TestConvertQualityOption:
 
     def test_quality_invalid_value(self, sample_square_image):
         """Test error for invalid quality value."""
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'jpeg', '--quality', '150'
         )
         assert exit_code == 2
@@ -240,7 +240,7 @@ class TestConvertQualityOption:
 
     def test_quality_zero_invalid(self, sample_square_image):
         """Test error for quality value of 0."""
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'jpeg', '--quality', '0'
         )
         assert exit_code == 2
@@ -253,7 +253,7 @@ class TestConvertStripExif:
         """Test that --strip-exif removes EXIF data."""
         output_dir = temp_dir / "converted"
 
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_image_with_exif, '--format', 'jpeg', '--strip-exif',
             '--output', str(output_dir)
         )
@@ -270,7 +270,7 @@ class TestConvertStripExif:
         """Test that EXIF is preserved when --strip-exif not used."""
         output_dir = temp_dir / "converted"
 
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_image_with_exif, '--format', 'jpeg',
             '--output', str(output_dir)
         )
@@ -289,28 +289,28 @@ class TestConvertExitCodes:
     def test_success_exit_code(self, sample_square_image, temp_dir):
         """Test successful conversion returns exit code 0."""
         output_dir = temp_dir / "converted"
-        exit_code, _, _ = run_imgpro_convert(
+        exit_code, _, _ = run_ipro_convert(
             sample_square_image, '--format', 'png', '--output', str(output_dir)
         )
         assert exit_code == 0
 
     def test_file_not_found_exit_code(self, temp_dir):
         """Test file not found returns exit code 3."""
-        exit_code, _, _ = run_imgpro_convert(
+        exit_code, _, _ = run_ipro_convert(
             temp_dir / "nonexistent.jpg", '--format', 'png'
         )
         assert exit_code == 3
 
     def test_cannot_read_exit_code(self, sample_non_image_file):
         """Test unreadable file returns exit code 4."""
-        exit_code, _, _ = run_imgpro_convert(
+        exit_code, _, _ = run_ipro_convert(
             sample_non_image_file, '--format', 'png'
         )
         assert exit_code == 4
 
     def test_invalid_args_exit_code(self, sample_square_image):
         """Test invalid arguments returns exit code 2."""
-        exit_code, _, _ = run_imgpro_convert(
+        exit_code, _, _ = run_ipro_convert(
             sample_square_image, '--format', 'jpeg', '--quality', '999'
         )
         assert exit_code == 2
@@ -322,7 +322,7 @@ class TestConvertOutputMessages:
     def test_success_message(self, sample_square_image, temp_dir):
         """Test success message is printed."""
         output_dir = temp_dir / "converted"
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'png', '--output', str(output_dir)
         )
 
@@ -339,7 +339,7 @@ class TestConvertOutputMessages:
         existing = output_dir / "square.png"
         existing.write_text("existing")
 
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'png', '--output', str(output_dir)
         )
 
@@ -358,7 +358,7 @@ class TestConvertEdgeCases:
         """Test converting JPEG to JPEG (re-encoding)."""
         output_dir = temp_dir / "converted"
 
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             sample_square_image, '--format', 'jpeg', '--output', str(output_dir)
         )
 
@@ -373,7 +373,7 @@ class TestConvertEdgeCases:
         img.save(original, 'JPEG')
 
         output_dir = temp_dir / "converted"
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             original, '--format', 'png', '--output', str(output_dir)
         )
 
@@ -388,7 +388,7 @@ class TestConvertEdgeCases:
         img.save(original, 'JPEG')
 
         output_dir = temp_dir / "converted"
-        exit_code, stdout, stderr = run_imgpro_convert(
+        exit_code, stdout, stderr = run_ipro_convert(
             original, '--format', 'png', '--output', str(output_dir)
         )
 
@@ -401,7 +401,7 @@ class TestConvertEdgeCases:
         original_exists_before = sample_square_image.exists()
         output_dir = temp_dir / "converted"
 
-        run_imgpro_convert(
+        run_ipro_convert(
             sample_square_image, '--format', 'png', '--output', str(output_dir)
         )
 

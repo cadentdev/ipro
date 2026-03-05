@@ -1,4 +1,4 @@
-# ImgPro Task List
+# ipro Task List
 
 This document tracks implementation progress based on `PRD.md`.
 
@@ -8,7 +8,7 @@ This document tracks implementation progress based on `PRD.md`.
 
 ## 📋 In Progress / Planned
 
-### 6. Align `imgpro resize` with PRD (Section 4.2) - Completed
+### 6. Align `ipro resize` with PRD (Section 4.2) - Completed
 
 > **Status:** Completed via PR #12 (2026-01-07)
 > **Breaking Change:** Removed `--input` flag in favor of positional `<file>` argument.
@@ -22,7 +22,7 @@ This document tracks implementation progress based on `PRD.md`.
   - [x] Update `README.md` examples to use positional `<file>`
   - [x] Update CLAUDE.md examples to use positional `<file>`
 
-### 7. Enhanced `imgpro info` Field Selection (Section 4.1 of PRD) - Priority 4
+### 7. Enhanced `ipro info` Field Selection (Section 4.1 of PRD) - Priority 4
 
 > **Status:** Not started
 > **Depends on:** None
@@ -105,7 +105,7 @@ Add individual field flags for selective metadata output.
 
 **Next Priorities (in order):**
 
-1. Add field selection to `imgpro info` command
+1. Add field selection to `ipro info` command
 2. Add `--verbose` and `--quiet` modes
 
 **Core Principle:** All file-modifying commands create copies by default (non-destructive).

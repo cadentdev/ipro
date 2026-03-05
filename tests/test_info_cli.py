@@ -1,4 +1,4 @@
-"""CLI integration tests for imgpro info command."""
+"""CLI integration tests for ipro info command."""
 
 import pytest
 import subprocess
@@ -7,9 +7,9 @@ import sys
 from pathlib import Path
 
 
-def run_imgpro_info(filepath, *args):
+def run_ipro_info(filepath, *args):
     """
-    Run imgpro info command and return result.
+    Run ipro info command and return result.
 
     Args:
         filepath: Path to image file
@@ -18,7 +18,7 @@ def run_imgpro_info(filepath, *args):
     Returns:
         tuple: (exit_code, stdout, stderr)
     """
-    cmd = [sys.executable, 'imgpro.py', 'info', str(filepath)] + list(args)
+    cmd = [sys.executable, 'ipro.py', 'info', str(filepath)] + list(args)
     result = subprocess.run(
         cmd,
         capture_output=True,
@@ -33,7 +33,7 @@ class TestInfoCommandBasics:
 
     def test_info_command_exists(self):
         """Test that info subcommand is recognized."""
-        cmd = [sys.executable, 'imgpro.py', 'info', '--help']
+        cmd = [sys.executable, 'ipro.py', 'info', '--help']
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -46,7 +46,7 @@ class TestInfoCommandBasics:
 
     def test_info_requires_file_argument(self):
         """Test that info command requires a file argument."""
-        cmd = [sys.executable, 'imgpro.py', 'info']
+        cmd = [sys.executable, 'ipro.py', 'info']
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -61,7 +61,7 @@ class TestInfoCommandBasics:
     def test_info_file_not_found(self, temp_dir):
         """Test error handling for non-existent file."""
         fake_file = temp_dir / 'does_not_exist.jpg'
-        exit_code, stdout, stderr = run_imgpro_info(fake_file)
+        exit_code, stdout, stderr = run_ipro_info(fake_file)
 
         # Should exit with code 3 (file not found)
         assert exit_code == 3
@@ -71,7 +71,7 @@ class TestInfoCommandBasics:
 
     def test_info_unsupported_file_format(self, sample_non_image_file):
         """Test error handling for non-image file."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_non_image_file)
+        exit_code, stdout, stderr = run_ipro_info(sample_non_image_file)
 
         # Should exit with non-zero code
         assert exit_code != 0
@@ -84,7 +84,7 @@ class TestInfoDefaultOutput:
 
     def test_info_default_output_square(self, sample_square_image):
         """Test default output for square image."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image)
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image)
 
         assert exit_code == 0
         # Output should be on stdout
@@ -97,7 +97,7 @@ class TestInfoDefaultOutput:
 
     def test_info_default_output_landscape(self, sample_landscape_image):
         """Test default output for landscape image."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_landscape_image)
+        exit_code, stdout, stderr = run_ipro_info(sample_landscape_image)
 
         assert exit_code == 0
         assert '1920' in stdout and '1080' in stdout
@@ -106,7 +106,7 @@ class TestInfoDefaultOutput:
 
     def test_info_default_output_portrait(self, sample_portrait_image):
         """Test default output for portrait image."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_portrait_image)
+        exit_code, stdout, stderr = run_ipro_info(sample_portrait_image)
 
         assert exit_code == 0
         assert '1080' in stdout and '1920' in stdout
@@ -115,7 +115,7 @@ class TestInfoDefaultOutput:
 
     def test_info_default_shows_file_size(self, sample_square_image):
         """Test that default output includes file size."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image)
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image)
 
         assert exit_code == 0
         # Should mention KB or file size
@@ -123,7 +123,7 @@ class TestInfoDefaultOutput:
 
     def test_info_default_shows_exif_presence(self, sample_image_with_exif):
         """Test that default output indicates EXIF presence."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_image_with_exif)
+        exit_code, stdout, stderr = run_ipro_info(sample_image_with_exif)
 
         assert exit_code == 0
         # Should mention EXIF in some way
@@ -135,7 +135,7 @@ class TestInfoJsonOutput:
 
     def test_info_json_flag(self, sample_square_image):
         """Test --json flag produces valid JSON."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image, '--json')
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image, '--json')
 
         assert exit_code == 0
         # Should be valid JSON
@@ -144,7 +144,7 @@ class TestInfoJsonOutput:
 
     def test_info_json_contains_required_fields(self, sample_square_image):
         """Test JSON output contains all required fields."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image, '--json')
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image, '--json')
 
         assert exit_code == 0
         data = json.loads(stdout)
@@ -161,7 +161,7 @@ class TestInfoJsonOutput:
 
     def test_info_json_correct_values_square(self, sample_square_image):
         """Test JSON output has correct values for square image."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image, '--json')
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image, '--json')
 
         assert exit_code == 0
         data = json.loads(stdout)
@@ -176,7 +176,7 @@ class TestInfoJsonOutput:
 
     def test_info_json_correct_values_landscape(self, sample_landscape_image):
         """Test JSON output for landscape image."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_landscape_image, '--json')
+        exit_code, stdout, stderr = run_ipro_info(sample_landscape_image, '--json')
 
         assert exit_code == 0
         data = json.loads(stdout)
@@ -189,7 +189,7 @@ class TestInfoJsonOutput:
 
     def test_info_json_with_exif(self, sample_image_with_exif):
         """Test JSON output includes EXIF data when present."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_image_with_exif, '--json')
+        exit_code, stdout, stderr = run_ipro_info(sample_image_with_exif, '--json')
 
         assert exit_code == 0
         data = json.loads(stdout)
@@ -201,7 +201,7 @@ class TestInfoJsonOutput:
 
     def test_info_json_without_exif(self, sample_image_no_exif):
         """Test JSON output when no EXIF data present."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_image_no_exif, '--json')
+        exit_code, stdout, stderr = run_ipro_info(sample_image_no_exif, '--json')
 
         assert exit_code == 0
         data = json.loads(stdout)
@@ -214,7 +214,7 @@ class TestInfoShortOutput:
 
     def test_info_short_flag(self, sample_square_image):
         """Test --short flag produces CSV line."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image, '--short')
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image, '--short')
 
         assert exit_code == 0
         # Should be a single line with commas
@@ -224,7 +224,7 @@ class TestInfoShortOutput:
 
     def test_info_short_field_count(self, sample_square_image):
         """Test --short output has correct number of fields."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image, '--short')
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image, '--short')
 
         assert exit_code == 0
         fields = stdout.strip().split(',')
@@ -235,7 +235,7 @@ class TestInfoShortOutput:
 
     def test_info_short_correct_values(self, sample_square_image):
         """Test --short output has correct values in correct order."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image, '--short')
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image, '--short')
 
         assert exit_code == 0
         fields = stdout.strip().split(',')
@@ -254,7 +254,7 @@ class TestInfoShortOutput:
 
     def test_info_short_landscape(self, sample_landscape_image):
         """Test --short output for landscape image."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_landscape_image, '--short')
+        exit_code, stdout, stderr = run_ipro_info(sample_landscape_image, '--short')
 
         assert exit_code == 0
         fields = stdout.strip().split(',')
@@ -269,8 +269,8 @@ class TestInfoShortOutput:
 
     def test_info_short_batch_compatible(self, sample_square_image, sample_landscape_image):
         """Test that multiple --short calls can be batched for CSV."""
-        exit_code1, stdout1, stderr1 = run_imgpro_info(sample_square_image, '--short')
-        exit_code2, stdout2, stderr2 = run_imgpro_info(sample_landscape_image, '--short')
+        exit_code1, stdout1, stderr1 = run_ipro_info(sample_square_image, '--short')
+        exit_code2, stdout2, stderr2 = run_ipro_info(sample_landscape_image, '--short')
 
         assert exit_code1 == 0 and exit_code2 == 0
 
@@ -288,7 +288,7 @@ class TestInfoExifFlags:
 
     def test_info_exif_flag_shows_curated(self, sample_image_with_exif):
         """Test --exif flag shows curated EXIF data."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_image_with_exif, '--exif')
+        exit_code, stdout, stderr = run_ipro_info(sample_image_with_exif, '--exif')
 
         assert exit_code == 0
         # Should show EXIF information
@@ -296,7 +296,7 @@ class TestInfoExifFlags:
 
     def test_info_exif_all_flag(self, sample_image_with_exif):
         """Test --exif-all flag shows all EXIF tags."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_image_with_exif, '--exif-all')
+        exit_code, stdout, stderr = run_ipro_info(sample_image_with_exif, '--exif-all')
 
         assert exit_code == 0
         # Should show more detailed EXIF information
@@ -305,7 +305,7 @@ class TestInfoExifFlags:
 
     def test_info_exif_json_combination(self, sample_image_with_exif):
         """Test --json with --exif-all includes full EXIF."""
-        exit_code, stdout, stderr = run_imgpro_info(
+        exit_code, stdout, stderr = run_ipro_info(
             sample_image_with_exif, '--json', '--exif-all'
         )
 
@@ -324,24 +324,24 @@ class TestInfoExitCodes:
 
     def test_info_success_exit_code(self, sample_square_image):
         """Test successful info command returns 0."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image)
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image)
         assert exit_code == 0
 
     def test_info_file_not_found_exit_code(self, temp_dir):
         """Test file not found returns exit code 3."""
         fake_file = temp_dir / 'missing.jpg'
-        exit_code, stdout, stderr = run_imgpro_info(fake_file)
+        exit_code, stdout, stderr = run_ipro_info(fake_file)
         assert exit_code == 3
 
     def test_info_unsupported_format_exit_code(self, sample_non_image_file):
         """Test unsupported format returns non-zero exit code."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_non_image_file)
+        exit_code, stdout, stderr = run_ipro_info(sample_non_image_file)
         # Should be non-zero (could be 1 or 4 depending on error type)
         assert exit_code != 0
 
     def test_info_missing_argument_exit_code(self):
         """Test missing file argument returns exit code 2."""
-        cmd = [sys.executable, 'imgpro.py', 'info']
+        cmd = [sys.executable, 'ipro.py', 'info']
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -357,14 +357,14 @@ class TestInfoFormatSupport:
 
     def test_info_supports_png(self, sample_png_image):
         """Test info command works with PNG files."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_png_image)
+        exit_code, stdout, stderr = run_ipro_info(sample_png_image)
 
         assert exit_code == 0
         assert '800' in stdout and '600' in stdout
 
     def test_info_supports_jpeg(self, sample_square_image):
         """Test info command works with JPEG files."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image)
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image)
 
         assert exit_code == 0
         assert '1000' in stdout
@@ -383,14 +383,14 @@ class TestInfoEdgeCases:
             filename='image with spaces.jpg'
         )
 
-        exit_code, stdout, stderr = run_imgpro_info(filepath)
+        exit_code, stdout, stderr = run_ipro_info(filepath)
 
         assert exit_code == 0
         assert 'image with spaces.jpg' in stdout
 
     def test_info_outputs_to_stdout_not_stderr(self, sample_square_image):
         """Test that normal output goes to stdout, not stderr."""
-        exit_code, stdout, stderr = run_imgpro_info(sample_square_image)
+        exit_code, stdout, stderr = run_ipro_info(sample_square_image)
 
         assert exit_code == 0
         # Normal output should be on stdout
@@ -401,7 +401,7 @@ class TestInfoEdgeCases:
     def test_info_errors_to_stderr(self, temp_dir):
         """Test that errors go to stderr, not stdout."""
         fake_file = temp_dir / 'missing.jpg'
-        exit_code, stdout, stderr = run_imgpro_info(fake_file)
+        exit_code, stdout, stderr = run_ipro_info(fake_file)
 
         assert exit_code != 0
         # Error should be on stderr
@@ -420,7 +420,7 @@ class TestInfoEdgeCases:
             filename='weird_ratio.jpg'
         )
 
-        exit_code, stdout, stderr = run_imgpro_info(filepath, '--json')
+        exit_code, stdout, stderr = run_ipro_info(filepath, '--json')
 
         assert exit_code == 0
         data = json.loads(stdout)
@@ -443,7 +443,7 @@ class TestInfoEdgeCases:
             pytest.skip("pillow-heif not installed")
 
         # Test default output
-        exit_code, stdout, stderr = run_imgpro_info(heif_test_file)
+        exit_code, stdout, stderr = run_ipro_info(heif_test_file)
 
         assert exit_code == 0
         assert 'IMG_3751.HEIC' in stdout
@@ -451,7 +451,7 @@ class TestInfoEdgeCases:
         assert '3:4' in stdout
 
         # Test JSON output
-        exit_code, stdout, stderr = run_imgpro_info(heif_test_file, '--json')
+        exit_code, stdout, stderr = run_ipro_info(heif_test_file, '--json')
 
         assert exit_code == 0
         data = json.loads(stdout)
@@ -462,7 +462,7 @@ class TestInfoEdgeCases:
         assert data['ratio_raw'] == '3:4'
 
         # Test CSV output
-        exit_code, stdout, stderr = run_imgpro_info(heif_test_file, '--short')
+        exit_code, stdout, stderr = run_ipro_info(heif_test_file, '--short')
 
         assert exit_code == 0
         assert 'IMG_3751.HEIC' in stdout

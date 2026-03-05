@@ -1,6 +1,6 @@
 """Unit tests for command chaining helper functions."""
 import pytest
-from imgpro import split_chain, _create_parser
+from ipro import split_chain, _create_parser
 
 
 class TestSplitChain:

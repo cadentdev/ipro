@@ -27,7 +27,7 @@ set -e
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-IMGPRO="$SCRIPT_DIR/../imgpro.py"
+IMGPRO="$SCRIPT_DIR/../ipro.py"
 
 # Default settings
 RESIZE_WIDTH="1080"
@@ -66,9 +66,9 @@ if [ ! -d "$INPUT_DIR" ]; then
     exit 1
 fi
 
-# Check if imgpro.py exists
+# Check if ipro.py exists
 if [ ! -f "$IMGPRO" ]; then
-    echo "Error: imgpro.py not found at: $IMGPRO" >&2
+    echo "Error: ipro.py not found at: $IMGPRO" >&2
     exit 1
 fi
 

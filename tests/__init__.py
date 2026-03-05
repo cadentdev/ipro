@@ -1,1 +1,1 @@
-"""Tests for imgpro CLI tool."""
+"""Tests for ipro CLI tool."""

@@ -57,18 +57,18 @@ Future versions may add an `--in-place` option to override this behavior for use
 - Needs to understand which images are landscape, portrait, or square
 - Needs to quickly see aspect ratios and dimensions to comply with platform constraints
 - Comfortable using shell scripts to batch-inspect large folders of images
-- Uses CSV/JSON reports (from `imgpro info`) to group and select images for posts and carousels
+- Uses CSV/JSON reports (from `ipro info`) to group and select images for posts and carousels
 
 ---
 
 ## 4. Functional Requirements
 
-### 4.1 Image Information (`imgpro info`)
+### 4.1 Image Information (`ipro info`)
 
 - **Requirement:** Inspect a single image file and report key metadata, orientation, and aspect ratio for scripting and analysis.
 - **Acceptance Criteria:**
   - **Input:**
-    - Accept a required positional `<filepath>` argument: `imgpro info <file> [options]`.
+    - Accept a required positional `<filepath>` argument: `ipro info <file> [options]`.
     - Support absolute and relative paths.
     - Validate that the file exists and is readable; otherwise print `Error: File not found: <path>` and exit with a non-zero status.
     - Attempt to open the file with Pillow; if Pillow cannot open it (e.g., non-image or unsupported format like MP4), print a clear "unsupported or unreadable image format" error and exit with a non-zero status.
@@ -101,7 +101,7 @@ Future versions may add an `--in-place` option to override this behavior for use
       - Fields should be in a stable, documented order such as:
         - `filename,width,height,orientation,ratio_raw,common_ratio,size_kb,creation_date`
       - Designed for use with shell loops for quick CSV generation, for example:
-        - `for img in *.jpg; do imgpro info "$img" --short >> info.csv; done`
+        - `for img in *.jpg; do ipro info "$img" --short >> info.csv; done`
   - **Custom field selection:**
     - Individual field flags allow selective output of specific metadata:
       - `--width` or `-w`: Output only width value
@@ -117,15 +117,15 @@ Future versions may add an `--in-place` option to override this behavior for use
       - `--key-value`: key-value pairs (e.g., `width: 1920, height: 1080, format: JPEG`)
     - JSON output always includes `filename` for identification.
   - **Format support:**
-    - `imgpro info` must support **any image format that the installed Pillow build can open**, including but not limited to JPEG, PNG, HEIF/HEIC, and certain RAW formats.
+    - `ipro info` must support **any image format that the installed Pillow build can open**, including but not limited to JPEG, PNG, HEIF/HEIC, and certain RAW formats.
     - Non-image files and unsupported formats (e.g., MP4) must fail with a clear error and non-zero exit code.
 
-### 4.2 Image Resizing (`imgpro resize`)
+### 4.2 Image Resizing (`ipro resize`)
 
 - **Requirement:** Resize images to specified dimensions while maintaining aspect ratio, without upscaling.
 - **Acceptance Criteria:**
   - **Invocation:**
-    - Support subcommand syntax: `imgpro resize <file> [options]`.
+    - Support subcommand syntax: `ipro resize <file> [options]`.
     - `<file>` is a required positional argument referring to the source image.
   - **Resize parameters:**
     - Support `--width <sizes>` with a comma-separated list of integer target widths.
@@ -157,15 +157,15 @@ Future versions may add an `--in-place` option to override this behavior for use
     - Future versions may add flags for preserving EXIF or stripping ICC profiles, but these are out of scope for the initial implementation.
   - **Format and codec behavior:**
     - Initial `resize` implementation targets JPEG input and JPEG output only.
-    - Future versions may extend `resize` to work with additional input/output formats in coordination with `imgpro convert`.
+    - Future versions may extend `resize` to work with additional input/output formats in coordination with `ipro convert`.
 
-### 4.3 Image Conversion (`imgpro convert`)
+### 4.3 Image Conversion (`ipro convert`)
 
 - **Requirement:** Convert images between Pillow-supported formats for web and social media workflows.
 - **Primary Use Case:** Converting HEIC/HEIF images (from iPhone) to JPEG for web compatibility.
 - **Acceptance Criteria:**
   - **Invocation:**
-    - Support subcommand syntax: `imgpro convert <source> --format <target_format> [options]`.
+    - Support subcommand syntax: `ipro convert <source> --format <target_format> [options]`.
     - `<source>` is a required positional argument referring to the input image file.
     - `--format` is a required option specifying the desired output format (e.g., `jpeg`, `png`, `webp`).
   - **Format support:**
@@ -189,7 +189,7 @@ Future versions may add an `--in-place` option to override this behavior for use
     - `resize` focuses on dimensions and quality.
     - Future versions may compose both behaviors (e.g., resize and convert in one step), but initial implementations treat them as separate commands.
 
-### 4.4 File Renaming (`imgpro rename`)
+### 4.4 File Renaming (`ipro rename`)
 
 - **Requirement:** Rename image files based on actual file format or EXIF metadata for better organization.
 - **Primary Use Cases:**
@@ -197,7 +197,7 @@ Future versions may add an `--in-place` option to override this behavior for use
   - Add EXIF date prefixes for chronological sorting by filename
 - **Acceptance Criteria:**
   - **Invocation:**
-    - Support subcommand syntax: `imgpro rename <file> [options]`.
+    - Support subcommand syntax: `ipro rename <file> [options]`.
     - `<file>` is a required positional argument referring to the image file.
     - At least one action flag is required: `--ext` or `--prefix-exif-date`.
   - **Extension correction (`--ext`):**
@@ -230,30 +230,30 @@ Future versions may add an `--in-place` option to override this behavior for use
 
 #### 4.5.1 Basic Syntax
 ```bash
-imgpro info <file> [options]
-imgpro resize <file> --width <sizes> [options]
-imgpro resize <file> --height <sizes> [options]
-imgpro convert <source> --format <target_format> [options]
-imgpro rename <file> --ext [options]
-imgpro rename <file> --prefix-exif-date [options]
+ipro info <file> [options]
+ipro resize <file> --width <sizes> [options]
+ipro resize <file> --height <sizes> [options]
+ipro convert <source> --format <target_format> [options]
+ipro rename <file> --ext [options]
+ipro rename <file> --prefix-exif-date [options]
 ```
 
 #### 4.5.2 Required Parameters
 
-- **`imgpro info`**
+- **`ipro info`**
   - `<file>`: path to source image file (positional, required).
 
-- **`imgpro resize`**
+- **`ipro resize`**
   - `--width <sizes>` **OR** `--height <sizes>` (mutually exclusive).
     - Comma-separated list of integers.
     - Example: `--width 300,600,900,1200`.
   - `<file>`: path to source image file (positional, required).
 
-- **`imgpro convert`**
+- **`ipro convert`**
   - `<source>`: path to source image file (positional, required).
   - `--format <target_format>`: desired output format (e.g., `jpeg`, `png`, `webp`).
 
-- **`imgpro rename`**
+- **`ipro rename`**
   - `<file>`: path to source image file (positional, required).
   - At least one of: `--ext` or `--prefix-exif-date`.
 
@@ -276,58 +276,58 @@ imgpro rename <file> --prefix-exif-date [options]
 #### 4.5.4 Usage Examples
 ```bash
 # Inspect image information for a single file (human-readable)
-imgpro info photo.jpg
+ipro info photo.jpg
 
 # Generate CSV of image metadata for all JPEGs in a directory
 for img in *.jpg; do
-  imgpro info "$img" --short >> info.csv
+  ipro info "$img" --short >> info.csv
 done
 
 # Basic usage - resize to multiple widths
-imgpro resize photo.jpg --width 300,600,900,1200
+ipro resize photo.jpg --width 300,600,900,1200
 
 # Custom quality and output directory
-imgpro resize photo.jpg --width 300,600 --quality 85 --output ~/web/images/
+ipro resize photo.jpg --width 300,600 --quality 85 --output ~/web/images/
 
 # Resize by height instead of width
-imgpro resize banner.jpg --height 400,800
+ipro resize banner.jpg --height 400,800
 
 # Batch processing via shell loop for resizing
 for img in *.jpg; do
-  imgpro resize "$img" --width 300,600,900
+  ipro resize "$img" --width 300,600,900
 done
 
 # Convert image to PNG
-imgpro convert photo.jpg --format png
+ipro convert photo.jpg --format png
 
 # Convert and organize outputs in a specific directory
-imgpro convert photo.jpg --format webp --output ./converted/
+ipro convert photo.jpg --format webp --output ./converted/
 
 # Convert HEIC to JPEG, stripping EXIF for privacy
-imgpro convert photo.heic --format jpeg --strip-exif
+ipro convert photo.heic --format jpeg --strip-exif
 
 # Fix mismatched extension (e.g., .HEIC file that's actually JPEG)
-imgpro rename photo.HEIC --ext
+ipro rename photo.HEIC --ext
 # Result: photo.jpg (in same directory)
 
 # Add EXIF date prefix for chronological sorting
-imgpro rename photo.jpg --prefix-exif-date
+ipro rename photo.jpg --prefix-exif-date
 # Result: 2023-12-15T142305_photo.jpg
 
 # Combine extension fix and date prefix
-imgpro rename photo.HEIC --ext --prefix-exif-date
+ipro rename photo.HEIC --ext --prefix-exif-date
 # Result: 2023-12-15T142305_photo.jpg
 
 # Get only specific fields from image info
-imgpro info photo.jpg --width --height
+ipro info photo.jpg --width --height
 # Result: 1920 1080
 
-imgpro info photo.jpg -w -h --format --json
+ipro info photo.jpg -w -h --format --json
 # Result: {"width": 1920, "height": 1080, "format": "JPEG", "filename": "photo.jpg"}
 
 # Batch rename with extension fix
 for img in *.HEIC; do
-  imgpro rename "$img" --ext || true
+  ipro rename "$img" --ext || true
 done
 ```
 
@@ -337,9 +337,9 @@ done
 - **Common (all commands):**
   - Missing required parameters → exit with error message and usage hint.
   - Invalid file path → `Error: File not found: <path>`.
-- **`imgpro info` / `imgpro convert`:**
+- **`ipro info` / `ipro convert`:**
   - Unsupported or unreadable image format → `Error: Unsupported or unreadable image format: <path>`.
-- **`imgpro resize`:**
+- **`ipro resize`:**
   - Unsupported format (non-JPEG input) → `Error: Unsupported format. This version of resize supports JPEG only.`
   - Invalid quality value → `Error: Quality must be between 1-100`.
   - Both width and height specified → `Error: Cannot specify both --width and --height`.
@@ -422,7 +422,7 @@ Successfully created 4 images from photo.jpg
 - **Test framework:** Use `pytest` as the primary test runner for unit, integration, and regression tests.
 - **Unit tests:**
   - Cover core logic such as size parsing, JPEG validation, aspect ratio calculation, orientation classification, and EXIF extraction.
-  - Verify behavior of helper functions used by `imgpro info`, `imgpro resize`, and `imgpro convert`.
+  - Verify behavior of helper functions used by `ipro info`, `ipro resize`, and `ipro convert`.
 - **CLI integration tests:**
   - Invoke subcommands (`info`, `resize`, `convert`) via the command line within tests.
   - Assert on exit codes and key parts of stdout/stderr for success and error scenarios.

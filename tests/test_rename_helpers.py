@@ -1,11 +1,11 @@
-"""Unit tests for imgpro rename helper functions."""
+"""Unit tests for ipro rename helper functions."""
 
 import pytest
 from pathlib import Path
 
 # Import the helper functions we'll be testing (these don't exist yet - TDD!)
 try:
-    from imgpro import (
+    from ipro import (
         get_format_extension,
         format_exif_date_prefix,
         build_renamed_filename,
@@ -231,7 +231,7 @@ class TestExtractExifDateForRename:
     def test_extract_date_from_exif_with_date(self, sample_image_with_exif):
         """Test extracting date from image with EXIF."""
         # We'll reuse existing extract_exif_data and format_exif_curated
-        from imgpro import extract_exif_data, format_exif_curated
+        from ipro import extract_exif_data, format_exif_curated
 
         exif = extract_exif_data(sample_image_with_exif)
         assert exif is not None
@@ -241,7 +241,7 @@ class TestExtractExifDateForRename:
     def test_no_date_in_exif_without_date(self, temp_dir):
         """Test handling image without date in EXIF."""
         from .fixtures import create_test_image_file, EXIF_DATA_NO_DATE
-        from imgpro import extract_exif_data, format_exif_curated
+        from ipro import extract_exif_data, format_exif_curated
 
         # Create image with EXIF but no date
         img_path = create_test_image_file(
@@ -257,7 +257,7 @@ class TestExtractExifDateForRename:
 
     def test_no_date_in_image_without_exif(self, sample_image_no_exif):
         """Test handling image without any EXIF."""
-        from imgpro import extract_exif_data, format_exif_curated
+        from ipro import extract_exif_data, format_exif_curated
 
         exif = extract_exif_data(sample_image_no_exif)
         curated = format_exif_curated(exif)

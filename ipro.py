@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ImgPro - Command-line tool for responsive image processing
+ipro - Command-line tool for responsive image processing
 """
 
 import argparse
@@ -25,7 +25,7 @@ except ImportError:
     pass  # pillow-heif not installed, HEIF support unavailable
 
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 
 # Exit codes
 EXIT_SUCCESS = 0
@@ -1216,7 +1216,7 @@ def cmd_rename(args):
             # Use tempfile.mkstemp for unpredictable temp filename (L1 security fix)
             fd, temp_name = tempfile.mkstemp(
                 dir=str(output_path.parent),
-                prefix='.imgpro_tmp_',
+                prefix='.ipro_tmp_',
                 suffix=output_path.suffix
             )
             temp_path = Path(temp_name)
@@ -1356,7 +1356,7 @@ def cmd_extract(args):
 
 
 def main():
-    """Main entry point for imgpro CLI."""
+    """Main entry point for ipro CLI."""
     # Save current directory to restore after processing
     original_dir = os.getcwd()
 
@@ -1377,14 +1377,14 @@ def _create_parser():
         argparse.ArgumentParser with all subcommand parsers configured.
     """
     parser = argparse.ArgumentParser(
-        description='ImgPro - Command-line tool for responsive image processing',
+        description='ipro - Command-line tool for responsive image processing',
         epilog=(
-            'Use "imgpro.py <command> --help" for more information about a command.\n'
-            'Chain commands with +: imgpro resize img.jpg --width 300 + convert --format webp'
+            'Use "ipro <command> --help" for more information about a command.\n'
+            'Chain commands with +: ipro resize img.jpg --width 300 + convert --format webp'
         )
     )
 
-    parser.add_argument('--version', '-v', action='version', version=f'ImgPro {__version__}')
+    parser.add_argument('--version', '-v', action='version', version=f'ipro {__version__}')
 
     # Create subparsers for different commands
     subparsers = parser.add_subparsers(dest='command', help='Available commands')

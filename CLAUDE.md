@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ImgPro is a Python CLI tool for responsive image processing, designed for web developers working with static site generators. It provides commands for inspecting image metadata, resizing, converting formats, and renaming based on EXIF data, with command chaining via `+`.
+ipro is a Python CLI tool for responsive image processing, designed for web developers working with static site generators. It provides commands for inspecting image metadata, resizing, converting formats, and renaming based on EXIF data, with command chaining via `+`.
 
-**Main file:** `imgpro.py` (single-file Python script, ~1400 lines)
+**Main file:** `ipro.py` (single-file Python script, ~1400 lines)
 **Current version:** 1.3.0
 **Python requirement:** 3.8+
 **Primary dependency:** Pillow (PIL), pillow-heif (for HEIF/HEIC support)
@@ -16,21 +16,21 @@ ImgPro is a Python CLI tool for responsive image processing, designed for web de
 ### Running the Tool
 ```bash
 # Info command - inspect image metadata
-python3 imgpro.py info <file> [--json|--short] [--exif|--exif-all]
+python3 ipro.py info <file> [--json|--short] [--exif|--exif-all]
 
 # Resize command - generate multiple image sizes
-python3 imgpro.py resize <file> --width <sizes> [--quality 90] [--output dir/]
-python3 imgpro.py resize <file> --height <sizes> [--quality 90] [--output dir/]
+python3 ipro.py resize <file> --width <sizes> [--quality 90] [--output dir/]
+python3 ipro.py resize <file> --height <sizes> [--quality 90] [--output dir/]
 
 # Convert command - change image format
-python3 imgpro.py convert <file> --format jpeg [--quality 80] [--strip-exif]
+python3 ipro.py convert <file> --format jpeg [--quality 80] [--strip-exif]
 
 # Rename command - rename based on format or EXIF date
-python3 imgpro.py rename <file> --ext [--prefix-exif-date] [--output dir/]
+python3 ipro.py rename <file> --ext [--prefix-exif-date] [--output dir/]
 
 # Command chaining - pipe output between commands
-python3 imgpro.py convert photo.heic --format jpeg + resize --width 1080
-python3 imgpro.py resize photo.jpg --width 300,600 + convert --format webp
+python3 ipro.py convert photo.heic --format jpeg + resize --width 1080
+python3 ipro.py resize photo.jpg --width 300,600 + convert --format webp
 ```
 
 ### Testing
@@ -43,7 +43,7 @@ python -m pytest tests/test_info_cli.py -v
 python -m pytest tests/test_security.py -v
 
 # Run with coverage
-python -m pytest tests/ --cov=imgpro --cov-report=term-missing
+python -m pytest tests/ --cov=ipro --cov-report=term-missing
 
 # Run specific test
 python -m pytest tests/test_info_cli.py::TestInfoCommandBasics::test_info_command_exists -v
@@ -57,7 +57,7 @@ python -m pytest tests/test_info_cli.py::TestInfoCommandBasics::test_info_comman
 ## Architecture
 
 ### Single-File Design
-All code lives in `imgpro.py` - there are no separate modules. This keeps the tool simple and portable.
+All code lives in `ipro.py` - there are no separate modules. This keeps the tool simple and portable.
 
 ### Named Constants
 Exit codes and defaults are defined as named constants near the top of the file:
@@ -247,7 +247,7 @@ Keep dependencies minimal:
 - **pillow-heif (>=0.13.0):** HEIF/HEIC format support (enables iPhone photo formats)
 - **pytest (>=7.0.0):** Testing framework
 
-**Note:** The `pillow-heif` dependency is automatically registered on import with graceful fallback if unavailable. See lines 20-24 in `imgpro.py`.
+**Note:** The `pillow-heif` dependency is automatically registered on import with graceful fallback if unavailable. See lines 20-24 in `ipro.py`.
 
 Avoid adding new dependencies unless absolutely necessary.
 

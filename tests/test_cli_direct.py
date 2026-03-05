@@ -17,7 +17,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_basic(self, sample_square_image, capsys):
         """Test cmd_info with basic arguments."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
 
         args = argparse.Namespace(
             file=str(sample_square_image),
@@ -36,7 +36,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_json_output(self, sample_square_image, capsys):
         """Test cmd_info with JSON output."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
         import json
 
         args = argparse.Namespace(
@@ -59,7 +59,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_short_output(self, sample_square_image, capsys):
         """Test cmd_info with short CSV output."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
 
         args = argparse.Namespace(
             file=str(sample_square_image),
@@ -82,7 +82,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_with_exif(self, sample_image_with_exif, capsys):
         """Test cmd_info with EXIF flag."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
 
         args = argparse.Namespace(
             file=str(sample_image_with_exif),
@@ -99,7 +99,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_with_exif_all(self, sample_image_with_exif, capsys):
         """Test cmd_info with --exif-all flag."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
 
         args = argparse.Namespace(
             file=str(sample_image_with_exif),
@@ -116,7 +116,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_json_with_exif_all(self, sample_image_with_exif, capsys):
         """Test cmd_info with JSON and --exif-all."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
         import json
 
         args = argparse.Namespace(
@@ -137,7 +137,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_file_not_found(self, temp_dir):
         """Test cmd_info with non-existent file."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
 
         args = argparse.Namespace(
             file=str(temp_dir / 'missing.jpg'),
@@ -154,7 +154,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_unsupported_format(self, sample_non_image_file):
         """Test cmd_info with unsupported file format."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
 
         args = argparse.Namespace(
             file=str(sample_non_image_file),
@@ -171,7 +171,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_landscape(self, sample_landscape_image, capsys):
         """Test cmd_info with landscape image."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
 
         args = argparse.Namespace(
             file=str(sample_landscape_image),
@@ -189,7 +189,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_portrait(self, sample_portrait_image, capsys):
         """Test cmd_info with portrait image."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
 
         args = argparse.Namespace(
             file=str(sample_portrait_image),
@@ -207,7 +207,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_no_exif_json(self, sample_image_no_exif, capsys):
         """Test cmd_info JSON output when no EXIF present."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
         import json
 
         args = argparse.Namespace(
@@ -227,7 +227,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_uncommon_ratio(self, temp_dir, capsys):
         """Test cmd_info with uncommon aspect ratio."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
         from tests.fixtures import create_test_image_file
         import json
 
@@ -255,7 +255,7 @@ class TestCmdInfoDirect:
 
     def test_cmd_info_common_ratio_display(self, sample_landscape_image, capsys):
         """Test that common ratio is displayed in default output."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
 
         args = argparse.Namespace(
             file=str(sample_landscape_image),
@@ -277,7 +277,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_basic_width(self, temp_dir, capsys):
         """Test cmd_resize with basic width argument."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(1200, 800, directory=temp_dir, filename='test.jpg')
@@ -300,7 +300,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_multiple_widths(self, temp_dir, capsys):
         """Test cmd_resize with multiple widths."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(1920, 1080, directory=temp_dir, filename='test.jpg')
@@ -321,7 +321,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_by_height(self, temp_dir, capsys):
         """Test cmd_resize with height argument."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(1200, 800, directory=temp_dir, filename='test.jpg')
@@ -343,7 +343,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_file_not_found(self, temp_dir):
         """Test cmd_resize with non-existent file."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
 
         args = argparse.Namespace(
             file=str(temp_dir / 'missing.jpg'),
@@ -360,7 +360,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_unsupported_format(self, temp_dir):
         """Test cmd_resize with non-JPEG file."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from PIL import Image
 
         # Create PNG file
@@ -383,7 +383,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_both_width_and_height(self, temp_dir):
         """Test cmd_resize with both width and height (should fail)."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(1200, 800, directory=temp_dir, filename='test.jpg')
@@ -403,7 +403,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_neither_width_nor_height(self, temp_dir):
         """Test cmd_resize with neither width nor height (should fail)."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(1200, 800, directory=temp_dir, filename='test.jpg')
@@ -423,7 +423,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_invalid_quality_low(self, temp_dir):
         """Test cmd_resize with quality < 1."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(1200, 800, directory=temp_dir, filename='test.jpg')
@@ -443,7 +443,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_invalid_quality_high(self, temp_dir):
         """Test cmd_resize with quality > 100."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(1200, 800, directory=temp_dir, filename='test.jpg')
@@ -463,7 +463,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_upscaling_warning(self, temp_dir, capsys):
         """Test cmd_resize shows warning for skipped sizes."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(800, 600, directory=temp_dir, filename='small.jpg')
@@ -485,7 +485,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_all_sizes_skipped(self, temp_dir, capsys):
         """Test cmd_resize when all sizes require upscaling."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(400, 300, directory=temp_dir, filename='tiny.jpg')
@@ -509,7 +509,7 @@ class TestCmdResizeDirect:
 
     def test_cmd_resize_custom_quality(self, temp_dir, capsys):
         """Test cmd_resize with custom quality."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(1200, 800, directory=temp_dir, filename='test.jpg')
@@ -534,9 +534,9 @@ class TestMainFunction:
 
     def test_main_no_command(self, monkeypatch, capsys):
         """Test main with no command shows help and exits 0."""
-        from imgpro import main
+        from ipro import main
 
-        monkeypatch.setattr(sys, 'argv', ['imgpro.py'])
+        monkeypatch.setattr(sys, 'argv', ['ipro.py'])
 
         with pytest.raises(SystemExit) as exc_info:
             main()
@@ -544,13 +544,13 @@ class TestMainFunction:
         assert exc_info.value.code == 0
 
         captured = capsys.readouterr()
-        assert 'usage' in captured.out.lower() or 'imgpro' in captured.out.lower()
+        assert 'usage' in captured.out.lower() or 'ipro' in captured.out.lower()
 
     def test_main_version_flag(self, monkeypatch, capsys):
         """Test main with --version flag."""
-        from imgpro import main, __version__
+        from ipro import main, __version__
 
-        monkeypatch.setattr(sys, 'argv', ['imgpro.py', '--version'])
+        monkeypatch.setattr(sys, 'argv', ['ipro.py', '--version'])
 
         with pytest.raises(SystemExit) as exc_info:
             main()
@@ -562,9 +562,9 @@ class TestMainFunction:
 
     def test_main_version_short_flag(self, monkeypatch, capsys):
         """Test main with -v flag."""
-        from imgpro import main, __version__
+        from ipro import main, __version__
 
-        monkeypatch.setattr(sys, 'argv', ['imgpro.py', '-v'])
+        monkeypatch.setattr(sys, 'argv', ['ipro.py', '-v'])
 
         with pytest.raises(SystemExit) as exc_info:
             main()
@@ -576,9 +576,9 @@ class TestMainFunction:
 
     def test_main_help_flag(self, monkeypatch, capsys):
         """Test main with --help flag."""
-        from imgpro import main
+        from ipro import main
 
-        monkeypatch.setattr(sys, 'argv', ['imgpro.py', '--help'])
+        monkeypatch.setattr(sys, 'argv', ['ipro.py', '--help'])
 
         with pytest.raises(SystemExit) as exc_info:
             main()
@@ -591,10 +591,10 @@ class TestMainFunction:
 
     def test_main_info_subcommand(self, monkeypatch, capsys, sample_square_image):
         """Test main with info subcommand."""
-        from imgpro import main
+        from ipro import main
 
         monkeypatch.setattr(sys, 'argv', [
-            'imgpro.py', 'info', str(sample_square_image)
+            'ipro.py', 'info', str(sample_square_image)
         ])
 
         main()
@@ -605,9 +605,9 @@ class TestMainFunction:
 
     def test_main_info_help(self, monkeypatch, capsys):
         """Test main with info --help."""
-        from imgpro import main
+        from ipro import main
 
-        monkeypatch.setattr(sys, 'argv', ['imgpro.py', 'info', '--help'])
+        monkeypatch.setattr(sys, 'argv', ['ipro.py', 'info', '--help'])
 
         with pytest.raises(SystemExit) as exc_info:
             main()
@@ -620,14 +620,14 @@ class TestMainFunction:
 
     def test_main_resize_subcommand(self, monkeypatch, capsys, temp_dir):
         """Test main with resize subcommand."""
-        from imgpro import main
+        from ipro import main
         from tests.fixtures import create_test_image_file
 
         img_path = create_test_image_file(1200, 800, directory=temp_dir, filename='test.jpg')
         output_dir = temp_dir / 'resized'
 
         monkeypatch.setattr(sys, 'argv', [
-            'imgpro.py', 'resize',
+            'ipro.py', 'resize',
             str(img_path),
             '--width', '300',
             '--output', str(output_dir)
@@ -640,9 +640,9 @@ class TestMainFunction:
 
     def test_main_resize_help(self, monkeypatch, capsys):
         """Test main with resize --help."""
-        from imgpro import main
+        from ipro import main
 
-        monkeypatch.setattr(sys, 'argv', ['imgpro.py', 'resize', '--help'])
+        monkeypatch.setattr(sys, 'argv', ['ipro.py', 'resize', '--help'])
 
         with pytest.raises(SystemExit) as exc_info:
             main()
@@ -656,11 +656,11 @@ class TestMainFunction:
 
     def test_main_info_json(self, monkeypatch, capsys, sample_square_image):
         """Test main with info --json."""
-        from imgpro import main
+        from ipro import main
         import json
 
         monkeypatch.setattr(sys, 'argv', [
-            'imgpro.py', 'info', str(sample_square_image), '--json'
+            'ipro.py', 'info', str(sample_square_image), '--json'
         ])
 
         main()
@@ -671,10 +671,10 @@ class TestMainFunction:
 
     def test_main_info_short(self, monkeypatch, capsys, sample_square_image):
         """Test main with info --short."""
-        from imgpro import main
+        from ipro import main
 
         monkeypatch.setattr(sys, 'argv', [
-            'imgpro.py', 'info', str(sample_square_image), '--short'
+            'ipro.py', 'info', str(sample_square_image), '--short'
         ])
 
         main()
@@ -685,9 +685,9 @@ class TestMainFunction:
 
     def test_main_unknown_command(self, monkeypatch, capsys):
         """Test main with unknown subcommand."""
-        from imgpro import main
+        from ipro import main
 
-        monkeypatch.setattr(sys, 'argv', ['imgpro.py', 'unknown'])
+        monkeypatch.setattr(sys, 'argv', ['ipro.py', 'unknown'])
 
         with pytest.raises(SystemExit) as exc_info:
             main()
@@ -701,7 +701,7 @@ class TestCmdInfoExifJsonCoverage:
 
     def test_cmd_info_json_with_exif_no_exif_all_flag(self, sample_image_with_exif, capsys):
         """Test JSON output with EXIF but WITHOUT --exif-all (covers line 391)."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
         import json
 
         # This specifically tests the elif branch at line 390-391
@@ -729,7 +729,7 @@ class TestCmdInfoUncommonRatioCoverage:
 
     def test_cmd_info_default_uncommon_ratio_no_common_match(self, temp_dir, capsys):
         """Test default output with uncommon ratio prints plain newline (covers line 422)."""
-        from imgpro import cmd_info
+        from ipro import cmd_info
         from tests.fixtures import create_test_image_file
 
         # Create image with uncommon ratio that won't match any common ratio
@@ -760,7 +760,7 @@ class TestCmdResizeCorruptImage:
 
     def test_cmd_resize_corrupt_jpeg(self, temp_dir):
         """Test cmd_resize with corrupt JPEG file gets unsupported format error."""
-        from imgpro import cmd_resize
+        from ipro import cmd_resize
 
         # Create a file with .jpg extension but invalid content
         corrupt_file = temp_dir / 'corrupt.jpg'
@@ -786,7 +786,7 @@ class TestResizeTransparencyModes:
 
     def test_resize_palette_mode_image(self, temp_dir):
         """Test resizing a palette mode image triggers transparency handling."""
-        from imgpro import resize_image
+        from ipro import resize_image
         from PIL import Image
 
         # Create a palette mode image with transparency
@@ -815,7 +815,7 @@ class TestResizeTransparencyModes:
 
     def test_resize_grayscale_mode_image(self, temp_dir):
         """Test resizing a grayscale (L mode) image converts to RGB."""
-        from imgpro import resize_image
+        from ipro import resize_image
         from PIL import Image
 
         # Create grayscale image, convert to RGB, save as JPEG

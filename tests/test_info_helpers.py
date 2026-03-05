@@ -1,4 +1,4 @@
-"""Unit tests for imgpro info helper functions."""
+"""Unit tests for ipro info helper functions."""
 
 import pytest
 from pathlib import Path
@@ -6,7 +6,7 @@ import math
 
 # Import the helper functions we'll be testing (these don't exist yet - TDD!)
 try:
-    from imgpro import (
+    from ipro import (
         calculate_aspect_ratio,
         classify_orientation,
         match_common_ratio,
@@ -328,7 +328,7 @@ class TestSerializeExifValue:
 
     def test_serialize_ifd_rational(self):
         """Test that IFDRational is converted to float."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
         from PIL.TiffImagePlugin import IFDRational
 
         rational = IFDRational(72, 1)
@@ -339,7 +339,7 @@ class TestSerializeExifValue:
 
     def test_serialize_ifd_rational_fraction(self):
         """Test IFDRational with non-integer result."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
         from PIL.TiffImagePlugin import IFDRational
 
         rational = IFDRational(1, 3)
@@ -350,7 +350,7 @@ class TestSerializeExifValue:
 
     def test_serialize_bytes_utf8(self):
         """Test that bytes are decoded as UTF-8."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
 
         byte_value = b'Canon EOS 5D'
         result = serialize_exif_value(byte_value)
@@ -360,7 +360,7 @@ class TestSerializeExifValue:
 
     def test_serialize_bytes_with_null(self):
         """Test bytes with null terminator."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
 
         byte_value = b'Test\x00'
         result = serialize_exif_value(byte_value)
@@ -370,7 +370,7 @@ class TestSerializeExifValue:
 
     def test_serialize_bytes_non_utf8(self):
         """Test bytes that aren't valid UTF-8."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
 
         # Invalid UTF-8 sequence
         byte_value = b'\xff\xfe\x00\x01'
@@ -381,7 +381,7 @@ class TestSerializeExifValue:
 
     def test_serialize_tuple(self):
         """Test that tuples are recursively processed."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
         from PIL.TiffImagePlugin import IFDRational
 
         tuple_value = (IFDRational(72, 1), IFDRational(96, 1))
@@ -394,7 +394,7 @@ class TestSerializeExifValue:
 
     def test_serialize_list(self):
         """Test that lists are recursively processed."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
         from PIL.TiffImagePlugin import IFDRational
 
         list_value = [IFDRational(72, 1), b'test']
@@ -406,7 +406,7 @@ class TestSerializeExifValue:
 
     def test_serialize_dict(self):
         """Test that dicts are recursively processed."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
         from PIL.TiffImagePlugin import IFDRational
 
         dict_value = {'resolution': IFDRational(72, 1), 'make': b'Canon'}
@@ -418,7 +418,7 @@ class TestSerializeExifValue:
 
     def test_serialize_nested_structure(self):
         """Test deeply nested structures."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
         from PIL.TiffImagePlugin import IFDRational
 
         nested = {'data': [IFDRational(1, 2), {'inner': b'value'}]}
@@ -429,7 +429,7 @@ class TestSerializeExifValue:
 
     def test_serialize_passthrough_int(self):
         """Test that integers pass through unchanged."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
 
         result = serialize_exif_value(42)
         assert result == 42
@@ -437,21 +437,21 @@ class TestSerializeExifValue:
 
     def test_serialize_passthrough_str(self):
         """Test that strings pass through unchanged."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
 
         result = serialize_exif_value("test string")
         assert result == "test string"
 
     def test_serialize_passthrough_float(self):
         """Test that floats pass through unchanged."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
 
         result = serialize_exif_value(3.14)
         assert result == 3.14
 
     def test_serialize_passthrough_none(self):
         """Test that None passes through unchanged."""
-        from imgpro import serialize_exif_value
+        from ipro import serialize_exif_value
 
         result = serialize_exif_value(None)
         assert result is None
@@ -462,21 +462,21 @@ class TestFormatExifCuratedEdgeCases:
 
     def test_format_exif_curated_empty_dict(self):
         """Test that empty dict returns empty dict."""
-        from imgpro import format_exif_curated
+        from ipro import format_exif_curated
 
         result = format_exif_curated({})
         assert result == {}
 
     def test_format_exif_curated_none_input(self):
         """Test that None input returns empty dict."""
-        from imgpro import format_exif_curated
+        from ipro import format_exif_curated
 
         result = format_exif_curated(None)
         assert result == {}
 
     def test_format_exif_curated_datetime_fallback(self):
         """Test fallback to DateTime when DateTimeOriginal is missing."""
-        from imgpro import format_exif_curated
+        from ipro import format_exif_curated
 
         exif_dict = {
             'DateTime': '2024:11:12 10:00:00',
@@ -489,7 +489,7 @@ class TestFormatExifCuratedEdgeCases:
 
     def test_format_exif_curated_prefers_datetimeoriginal(self):
         """Test that DateTimeOriginal is preferred over DateTime."""
-        from imgpro import format_exif_curated
+        from ipro import format_exif_curated
 
         exif_dict = {
             'DateTimeOriginal': '2024:11:12 14:30:00',
@@ -502,7 +502,7 @@ class TestFormatExifCuratedEdgeCases:
 
     def test_format_exif_curated_no_date_fields(self):
         """Test when neither date field is present."""
-        from imgpro import format_exif_curated
+        from ipro import format_exif_curated
 
         exif_dict = {
             'Make': 'Canon',

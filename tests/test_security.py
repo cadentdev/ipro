@@ -1,4 +1,4 @@
-"""Security-focused tests for imgpro.
+"""Security-focused tests for ipro.
 
 Tests the security hardening added across all priority levels:
 H1: Output directory path traversal
@@ -21,7 +21,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 from PIL import Image
 
-from imgpro import (
+from ipro import (
     validate_output_path,
     resolve_output_dir,
     validate_input_file,
@@ -62,11 +62,11 @@ class TestOutputPathTraversal:
     def test_warns_on_absolute_outside_tree(self, sample_square_image, capsys):
         """Absolute path outside input's parent tree produces a warning."""
         # This should succeed but warn
-        result = validate_output_path("/tmp/imgpro_test_output", sample_square_image)
+        result = validate_output_path("/tmp/ipro_test_output", sample_square_image)
         captured = capsys.readouterr()
         assert "Warning" in captured.err
         assert "outside" in captured.err.lower()
-        assert result == Path("/tmp/imgpro_test_output").resolve()
+        assert result == Path("/tmp/ipro_test_output").resolve()
 
     def test_allows_relative_safe_path(self, sample_square_image):
         """A normal relative path passes validation without error."""
@@ -100,7 +100,7 @@ class TestDecompressionBomb:
         out = temp_dir / "output.jpg"
 
         # Mock Image.open to raise DecompressionBombError
-        with patch('imgpro.Image.open', side_effect=Image.DecompressionBombError("too big")):
+        with patch('ipro.Image.open', side_effect=Image.DecompressionBombError("too big")):
             result = convert_image(src, out, "jpeg")
 
         assert result is False
@@ -115,7 +115,7 @@ class TestDecompressionBomb:
         img.save(test_file, 'JPEG')
 
         # Mock os.path.getsize to return a value over the limit
-        with patch('imgpro.os.path.getsize', return_value=MAX_INPUT_FILE_SIZE + 1):
+        with patch('ipro.os.path.getsize', return_value=MAX_INPUT_FILE_SIZE + 1):
             with pytest.raises(SystemExit) as exc_info:
                 validate_input_file(str(test_file))
             assert exc_info.value.code == EXIT_INVALID_ARGS
@@ -208,7 +208,7 @@ class TestRenameOverwriteWarning:
 
     def test_rename_warns_on_existing_output(self, temp_dir, capsys):
         """cmd_rename warns when copying over an existing file."""
-        from imgpro import cmd_rename
+        from ipro import cmd_rename
 
         # Create source image
         src = temp_dir / "photo.HEIC"
@@ -274,7 +274,7 @@ class TestChainTOCTOU:
 
     def test_chain_stops_on_missing_intermediate_file(self, temp_dir, capsys):
         """Chain stops if intermediate file disappears between commands."""
-        from imgpro import _create_parser
+        from ipro import _create_parser
 
         # Create a test image
         src = temp_dir / "test.jpg"
@@ -311,13 +311,13 @@ class TestChainTOCTOU:
             # Actually, let's just exercise the code path by having the first
             # command produce a result, then deleting the file before the second
             # command runs.
-            import imgpro
+            import ipro
 
-            original_execute = imgpro._execute_chain
+            original_execute = ipro._execute_chain
 
             def patched_chain(segs):
                 # Parse and run first segment
-                p = imgpro._create_parser()
+                p = ipro._create_parser()
                 args = p.parse_args(segs[0])
                 output_files = args.func(args)
 

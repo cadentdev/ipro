@@ -1,4 +1,4 @@
-# ImgPro Completed Tasks
+# ipro Completed Tasks
 
 This document archives completed implementation tasks from `TASKS.md`.
 
@@ -6,14 +6,14 @@ This document archives completed implementation tasks from `TASKS.md`.
 
 ## ✅ Completed Tasks
 
-### 1. Implement `imgpro info` (Section 4.1 of PRD)
+### 1. Implement `ipro info` (Section 4.1 of PRD)
 
 **Status:** Completed via PR #3
 **Test Coverage:** 69/69 tests passing (36 unit + 33 CLI integration)
 
 - [x] Core CLI wiring
-  - [x] Add an `info` subcommand to `imgpro.py`
-  - [x] Use positional `<file>` argument: `imgpro info <file> [options]`
+  - [x] Add an `info` subcommand to `ipro.py`
+  - [x] Use positional `<file>` argument: `ipro info <file> [options]`
   - [x] Add flags: `--json`, `--short`, `--exif`, `--exif-all`
 
 - [x] Core behavior
@@ -72,7 +72,7 @@ This document archives completed implementation tasks from `TASKS.md`.
   - [x] GitHub Actions workflow for automated testing on PRs
   - [x] Tests across Python 3.8, 3.9, 3.10, 3.11
 
-### 3. Implement `imgpro rename` (Section 4.4 of PRD)
+### 3. Implement `ipro rename` (Section 4.4 of PRD)
 
 **Status:** Completed in v1.1.0
 
@@ -104,7 +104,7 @@ The `rename` command provides two key features for organizing image files:
   - [x] Support `--output <directory>` option
   - [x] Exit codes: 0=success, 3=not found, 4=cannot read
 
-### 4. Implement `imgpro convert` (Section 4.3 of PRD)
+### 4. Implement `ipro convert` (Section 4.3 of PRD)
 
 **Status:** Completed in v1.2.0
 
@@ -132,7 +132,7 @@ The `convert` command enables format conversion, primarily HEIC→JPEG.
 
 **Status:** Completed in v1.2.0
 
-Utility scripts demonstrating batch workflows with imgpro.
+Utility scripts demonstrating batch workflows with ipro.
 
 - [x] Create `scripts/` directory structure
 - [x] Create `scripts/README.md` with usage examples
@@ -140,7 +140,7 @@ Utility scripts demonstrating batch workflows with imgpro.
 - [x] Script 1: `resize-all.sh`
   - [x] Resize all images in directory to specified width
   - [x] Skip files already smaller than target width
-  - [x] Use `python3 imgpro.py` invocation
+  - [x] Use `python3 ipro.py` invocation
 
 - [x] Script 2: `organize-by-orientation.sh`
   - [x] Copy images to subdirectories by orientation (landscape/, portrait/, square/)

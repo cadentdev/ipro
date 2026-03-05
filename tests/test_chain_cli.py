@@ -5,11 +5,11 @@ import pytest
 from pathlib import Path
 
 
-IMGPRO = str(Path(__file__).parent.parent / 'imgpro.py')
+IMGPRO = str(Path(__file__).parent.parent / 'ipro.py')
 
 
-def run_imgpro(*args):
-    """Run imgpro.py with the given arguments and return CompletedProcess."""
+def run_ipro(*args):
+    """Run ipro.py with the given arguments and return CompletedProcess."""
     return subprocess.run(
         [sys.executable, IMGPRO] + list(args),
         capture_output=True,
@@ -25,7 +25,7 @@ class TestChainResizeConvert:
         output_resize = temp_dir / 'resized'
         output_convert = temp_dir / 'converted'
 
-        result = run_imgpro(
+        result = run_ipro(
             'resize', str(sample_landscape_image),
             '--width', '300',
             '--output', str(output_resize),
@@ -48,7 +48,7 @@ class TestChainResizeConvert:
         output_resize = temp_dir / 'resized'
         output_convert = temp_dir / 'converted'
 
-        result = run_imgpro(
+        result = run_ipro(
             'resize', str(sample_landscape_image),
             '--width', '300,600',
             '--output', str(output_resize),
@@ -72,7 +72,7 @@ class TestChainResizeConvert:
         output_resize = temp_dir / 'resized'
         output_convert = temp_dir / 'converted'
 
-        result = run_imgpro(
+        result = run_ipro(
             'resize', str(sample_landscape_image),
             '--width', '300',
             '--quality', '50',
@@ -97,7 +97,7 @@ class TestChainConvertResize:
         output_convert = temp_dir / 'converted'
         output_resize = temp_dir / 'resized'
 
-        result = run_imgpro(
+        result = run_ipro(
             'convert', str(sample_landscape_image),
             '--format', 'png',
             '--output', str(output_convert),
@@ -117,7 +117,7 @@ class TestChainConvertResize:
         output_convert = temp_dir / 'converted'
         output_resize = temp_dir / 'resized'
 
-        result = run_imgpro(
+        result = run_ipro(
             'convert', str(sample_png_image),
             '--format', 'jpeg',
             '--output', str(output_convert),
@@ -142,7 +142,7 @@ class TestChainThreeCommands:
         output_convert = temp_dir / 'converted'
         output_rename = temp_dir / 'renamed'
 
-        result = run_imgpro(
+        result = run_ipro(
             'resize', str(sample_landscape_image),
             '--width', '300',
             '--output', str(output_resize),
@@ -169,7 +169,7 @@ class TestChainWithInfo:
         """info + convert: info passes through input file to convert."""
         output_convert = temp_dir / 'converted'
 
-        result = run_imgpro(
+        result = run_ipro(
             'info', str(sample_landscape_image),
             '+',
             'convert', '--format', 'webp',
@@ -189,7 +189,7 @@ class TestChainErrorHandling:
 
     def test_first_command_file_not_found(self, temp_dir):
         """Error in first command aborts entire chain."""
-        result = run_imgpro(
+        result = run_ipro(
             'resize', '/nonexistent/photo.jpg',
             '--width', '300',
             '+',
@@ -203,7 +203,7 @@ class TestChainErrorHandling:
         """Error in second command exits with appropriate code."""
         output_resize = temp_dir / 'resized'
 
-        result = run_imgpro(
+        result = run_ipro(
             'resize', str(sample_landscape_image),
             '--width', '300',
             '--output', str(output_resize),
@@ -219,7 +219,7 @@ class TestChainErrorHandling:
         output_resize = temp_dir / 'resized'
         output_convert = temp_dir / 'converted'
 
-        result = run_imgpro(
+        result = run_ipro(
             'resize', str(sample_landscape_image),
             '--width', '9999',  # larger than 1920px original
             '--output', str(output_resize),
@@ -239,14 +239,14 @@ class TestSingleCommandUnchanged:
 
     def test_single_info(self, sample_landscape_image):
         """Single info command works unchanged."""
-        result = run_imgpro('info', str(sample_landscape_image))
+        result = run_ipro('info', str(sample_landscape_image))
         assert result.returncode == 0
         assert 'landscape.jpg' in result.stdout
 
     def test_single_resize(self, sample_landscape_image, temp_dir):
         """Single resize command works unchanged."""
         output_dir = temp_dir / 'resized'
-        result = run_imgpro(
+        result = run_ipro(
             'resize', str(sample_landscape_image),
             '--width', '300',
             '--output', str(output_dir),
@@ -257,7 +257,7 @@ class TestSingleCommandUnchanged:
     def test_single_convert(self, sample_landscape_image, temp_dir):
         """Single convert command works unchanged."""
         output_dir = temp_dir / 'converted'
-        result = run_imgpro(
+        result = run_ipro(
             'convert', str(sample_landscape_image),
             '--format', 'webp',
             '--output', str(output_dir),
@@ -267,7 +267,7 @@ class TestSingleCommandUnchanged:
 
     def test_no_command_shows_help(self):
         """No command shows help text."""
-        result = run_imgpro()
+        result = run_ipro()
         assert result.returncode == 0
 
 
@@ -279,7 +279,7 @@ class TestChainOutput:
         output_resize = temp_dir / 'resized'
         output_convert = temp_dir / 'converted'
 
-        result = run_imgpro(
+        result = run_ipro(
             'resize', str(sample_landscape_image),
             '--width', '300',
             '--output', str(output_resize),

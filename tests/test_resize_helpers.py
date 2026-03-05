@@ -5,7 +5,7 @@ from pathlib import Path
 import argparse
 
 # Import the helper functions
-from imgpro import (
+from ipro import (
     parse_sizes,
     get_file_size_kb,
     resize_image,
@@ -486,7 +486,7 @@ class TestExtractExifExceptionHandling:
 
     def test_extract_exif_corrupt_file(self, temp_dir):
         """Test extract_exif_data handles corrupt files gracefully."""
-        from imgpro import extract_exif_data
+        from ipro import extract_exif_data
 
         # Create a corrupt file
         corrupt_file = temp_dir / "corrupt.jpg"
@@ -498,7 +498,7 @@ class TestExtractExifExceptionHandling:
 
     def test_extract_exif_nonexistent_file(self, temp_dir):
         """Test extract_exif_data handles missing files gracefully."""
-        from imgpro import extract_exif_data
+        from ipro import extract_exif_data
 
         missing_file = temp_dir / "missing.jpg"
 

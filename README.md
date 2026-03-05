@@ -1,13 +1,13 @@
-# ImgPro
+# ipro
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://github.com/cadentdev/imgpro/actions/workflows/test.yml/badge.svg)](https://github.com/cadentdev/imgpro/actions/workflows/test.yml)
+[![Tests](https://github.com/cadentdev/ipro/actions/workflows/test.yml/badge.svg)](https://github.com/cadentdev/ipro/actions/workflows/test.yml)
 [![Code Style](https://img.shields.io/badge/code%20style-PEP8-brightgreen.svg)](https://www.python.org/dev/peps/pep-0008/)
 
 Cross-platform image processing tools written in Python.
 
-A command-line tool for generating multiple resolutions of images to support responsive web design workflows, specifically for static site generators like 11ty. ImgPro enables developers to create `srcset`-ready images from source files with configurable dimensions and quality settings.
+A command-line tool for generating multiple resolutions of images to support responsive web design workflows, specifically for static site generators like 11ty. ipro enables developers to create `srcset`-ready images from source files with configurable dimensions and quality settings.
 
 ## Features
 
@@ -56,8 +56,8 @@ A command-line tool for generating multiple resolutions of images to support res
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/cadentdev/imgpro.git
-   cd imgpro
+   git clone https://github.com/cadentdev/ipro.git
+   cd ipro
    ```
 
 2. **Create a virtual environment and install dependencies**:
@@ -71,31 +71,31 @@ A command-line tool for generating multiple resolutions of images to support res
 3. **Make the script executable** (optional):
 
    ```bash
-   chmod +x imgpro.py
+   chmod +x ipro.py
    ```
 
 ### Install with pipx (recommended)
 
-[pipx](https://pipx.pypa.io/) installs `imgpro` in an isolated environment and adds it to your PATH:
+[pipx](https://pipx.pypa.io/) installs `ipro` in an isolated environment and adds it to your PATH:
 
 ```bash
 # Standard install (uses a snapshot of the code)
 pipx install .
 
-# Editable install (reflects changes to imgpro.py immediately — useful for development)
+# Editable install (reflects changes to ipro.py immediately — useful for development)
 pipx install --editable .
 ```
 
 Then run from anywhere:
 
 ```bash
-imgpro --help
+ipro --help
 ```
 
 To uninstall:
 
 ```bash
-pipx uninstall imgpro
+pipx uninstall ipro
 ```
 
 ### Troubleshooting Installation
@@ -123,23 +123,23 @@ python3 -m pip install --user --break-system-packages pillow pillow-heif pytest
 
 ## Usage
 
-ImgPro provides several commands for image processing workflows.
+ipro provides several commands for image processing workflows.
 
 ### Basic Syntax
 
 ```bash
 # Info command - inspect image metadata
-python3 imgpro.py info <file> [options]
+python3 ipro.py info <file> [options]
 
 # Resize command - generate multiple sizes
-python3 imgpro.py resize <file> --width <sizes> [options]
-python3 imgpro.py resize <file> --height <sizes> [options]
+python3 ipro.py resize <file> --width <sizes> [options]
+python3 ipro.py resize <file> --height <sizes> [options]
 
 # Convert command - change image format
-python3 imgpro.py convert <file> --format <format> [options]
+python3 ipro.py convert <file> --format <format> [options]
 
 # Rename command - fix extensions and add date prefix
-python3 imgpro.py rename <file> --ext --prefix-exif-date [options]
+python3 ipro.py rename <file> --ext --prefix-exif-date [options]
 ```
 
 ---
@@ -151,7 +151,7 @@ Inspect image files to view dimensions, orientation, aspect ratio, and EXIF meta
 ### Info Command Usage
 
 ```bash
-python3 imgpro.py info <file> [options]
+python3 ipro.py info <file> [options]
 ```
 
 ### Info Parameters
@@ -179,7 +179,7 @@ python3 imgpro.py info <file> [options]
 #### Basic Image Info
 
 ```bash
-python3 imgpro.py info photo.jpg
+python3 ipro.py info photo.jpg
 ```
 
 **Output:**
@@ -197,7 +197,7 @@ EXIF Present: Yes
 #### JSON Output
 
 ```bash
-python3 imgpro.py info photo.jpg --json
+python3 ipro.py info photo.jpg --json
 ```
 
 **Output:**
@@ -211,7 +211,7 @@ python3 imgpro.py info photo.jpg --json
 ```bash
 # Generate CSV of all images in a directory (multiple formats)
 for img in *.{jpg,jpeg,JPG,JPEG,png,heic,HEIC}; do
-  python3 imgpro.py info "$img" --short 2>/dev/null >> images.csv || true
+  python3 ipro.py info "$img" --short 2>/dev/null >> images.csv || true
 done
 ```
 
@@ -228,7 +228,7 @@ photo3.jpg,1000,1000,square,1:1,1:1,156.78,
 #### View EXIF Metadata
 
 ```bash
-python3 imgpro.py info photo.jpg --exif
+python3 ipro.py info photo.jpg --exif
 ```
 
 **Additional output:**
@@ -252,8 +252,8 @@ Generate multiple image sizes from a single source while maintaining aspect rati
 ### Resize Command Usage
 
 ```bash
-python3 imgpro.py resize <file> --width <sizes> [options]
-python3 imgpro.py resize <file> --height <sizes> [options]
+python3 ipro.py resize <file> --width <sizes> [options]
+python3 ipro.py resize <file> --height <sizes> [options]
 ```
 
 ### Resize Parameters
@@ -281,7 +281,7 @@ python3 imgpro.py resize <file> --height <sizes> [options]
 #### Resize to Multiple Widths
 
 ```bash
-python3 imgpro.py resize photo.jpg --width 300,600,900,1200
+python3 ipro.py resize photo.jpg --width 300,600,900,1200
 ```
 
 **Output:**
@@ -301,26 +301,26 @@ Successfully created 4 image(s) from photo.jpg
 #### Custom Quality and Output Directory
 
 ```bash
-python3 imgpro.py resize photo.jpg --width 300,600 --quality 85 --output ~/web/images/
+python3 ipro.py resize photo.jpg --width 300,600 --quality 85 --output ~/web/images/
 ```
 
 #### Resize by Height
 
 ```bash
-python3 imgpro.py resize banner.jpg --height 400,800
+python3 ipro.py resize banner.jpg --height 400,800
 ```
 
 #### Batch Processing with Shell Loop
 
 ```bash
-# Using imgpro in PATH (see "Add to PATH" section)
+# Using ipro in PATH (see "Add to PATH" section)
 for img in *.jpg; do
-  imgpro resize "$img" --width 1080 --quality 80
+  ipro resize "$img" --width 1080 --quality 80
 done
 
 # Or using python3 directly
 for img in *.jpg; do
-  python3 imgpro.py resize "$img" --width 300,600,900
+  python3 ipro.py resize "$img" --width 300,600,900
 done
 ```
 
@@ -328,7 +328,7 @@ done
 
 ```bash
 find ./photos -name "*.jpg" | while read img; do
-  python3 imgpro.py resize "$img" --width 300,600 --output ./resized/
+  python3 ipro.py resize "$img" --width 300,600 --output ./resized/
 done
 ```
 
@@ -341,7 +341,7 @@ Convert images between formats with automatic sRGB color profile conversion.
 ### Convert Command Usage
 
 ```bash
-python3 imgpro.py convert <file> --format <format> [options]
+python3 ipro.py convert <file> --format <format> [options]
 ```
 
 ### Convert Parameters
@@ -362,20 +362,20 @@ python3 imgpro.py convert <file> --format <format> [options]
 #### Convert HEIC to JPEG
 
 ```bash
-python3 imgpro.py convert photo.heic --format jpeg
+python3 ipro.py convert photo.heic --format jpeg
 ```
 
 #### Convert to WebP with Custom Quality
 
 ```bash
-python3 imgpro.py convert photo.jpg --format webp --quality 85 --output ./webp/
+python3 ipro.py convert photo.jpg --format webp --quality 85 --output ./webp/
 ```
 
 #### Batch Convert All HEIC Files
 
 ```bash
 for img in *.heic; do
-  python3 imgpro.py convert "$img" --format jpeg
+  python3 ipro.py convert "$img" --format jpeg
 done
 ```
 
@@ -388,7 +388,7 @@ Rename images based on actual format or EXIF metadata.
 ### Rename Command Usage
 
 ```bash
-python3 imgpro.py rename <file> [--ext] [--prefix-exif-date] [options]
+python3 ipro.py rename <file> [--ext] [--prefix-exif-date] [options]
 ```
 
 ### Rename Parameters
@@ -408,21 +408,21 @@ python3 imgpro.py rename <file> [--ext] [--prefix-exif-date] [options]
 
 ```bash
 # photo.HEIC (actually JPEG) → photo.jpg
-python3 imgpro.py rename photo.HEIC --ext
+python3 ipro.py rename photo.HEIC --ext
 ```
 
 #### Add EXIF Date Prefix
 
 ```bash
 # photo.jpg → 2024-11-12T143000_photo.jpg
-python3 imgpro.py rename photo.jpg --prefix-exif-date
+python3 ipro.py rename photo.jpg --prefix-exif-date
 ```
 
 #### Combine Both Operations
 
 ```bash
 # photo.HEIC (JPEG, taken 2024-11-12 14:30:00) → 2024-11-12T143000_photo.jpg
-python3 imgpro.py rename photo.HEIC --ext --prefix-exif-date
+python3 ipro.py rename photo.HEIC --ext --prefix-exif-date
 ```
 
 ---
@@ -434,7 +434,7 @@ Chain multiple commands together using the `+` separator. Each command's output 
 ### Chaining Syntax
 
 ```bash
-python3 imgpro.py <command1> <file> [options] + <command2> [options] + <command3> [options]
+python3 ipro.py <command1> <file> [options] + <command2> [options] + <command3> [options]
 ```
 
 ### How It Works
@@ -450,21 +450,21 @@ python3 imgpro.py <command1> <file> [options] + <command2> [options] + <command3
 
 ```bash
 # Convert HEIC to JPEG at 80% quality, then resize to 1080px wide
-python3 imgpro.py convert photo.heic --format jpeg --quality 80 + resize --width 1080
+python3 ipro.py convert photo.heic --format jpeg --quality 80 + resize --width 1080
 ```
 
 #### Resize and Convert to WebP
 
 ```bash
 # Resize to multiple widths, then convert all to WebP
-python3 imgpro.py resize photo.jpg --width 300,600,1200 + convert --format webp
+python3 ipro.py resize photo.jpg --width 300,600,1200 + convert --format webp
 ```
 
 #### Three-Step Pipeline
 
 ```bash
 # Resize, convert to WebP, then fix extensions
-python3 imgpro.py resize photo.jpg --width 300 --output ./resized + convert --format webp --output ./converted + rename --ext --output ./final
+python3 ipro.py resize photo.jpg --width 300 --output ./resized + convert --format webp --output ./converted + rename --ext --output ./final
 ```
 
 #### Batch Chain Processing
@@ -472,7 +472,7 @@ python3 imgpro.py resize photo.jpg --width 300 --output ./resized + convert --fo
 ```bash
 # Process all HEIC files: convert to JPEG + resize for web
 for img in *.heic; do
-  python3 imgpro.py convert "$img" --format jpeg --quality 80 + resize --width 1080
+  python3 ipro.py convert "$img" --format jpeg --quality 80 + resize --width 1080
 done
 ```
 
@@ -541,7 +541,7 @@ source .venv/bin/activate
 2. **Test basic resize**:
 
    ```bash
-   python3 imgpro.py resize test_photo.jpg --width 300,600,900
+   python3 ipro.py resize test_photo.jpg --width 300,600,900
    ```
 
 3. **Verify output**:
@@ -553,7 +553,7 @@ source .venv/bin/activate
 4. **Test upscaling prevention**:
 
    ```bash
-   python3 imgpro.py resize test_photo.jpg --width 300,600,1500
+   python3 ipro.py resize test_photo.jpg --width 300,600,1500
    # Should skip 1500px with a warning
    ```
 
@@ -561,11 +561,11 @@ source .venv/bin/activate
 
    ```bash
    # Test missing file
-   python3 imgpro.py resize nonexistent.jpg --width 300
+   python3 ipro.py resize nonexistent.jpg --width 300
 
    # Test non-JPEG file
    touch test.png
-   python3 imgpro.py resize test.png --width 300
+   python3 ipro.py resize test.png --width 300
    ```
 
 ### Test Scenarios Covered
@@ -595,7 +595,7 @@ python -m pytest tests/ -v
 **Run with coverage report:**
 
 ```bash
-python -m pytest tests/ --cov=imgpro --cov-report=term-missing
+python -m pytest tests/ --cov=ipro --cov-report=term-missing
 ```
 
 **Test Coverage:**
@@ -645,7 +645,7 @@ See `TASKS.md` for current development priorities and `tests/` for examples.
 
 ## Output File Naming
 
-ImgPro uses a simple, predictable naming pattern:
+ipro uses a simple, predictable naming pattern:
 
 **Pattern**: `{basename}_{size}.{ext}`
 
@@ -659,7 +659,7 @@ The size suffix represents the dimension specified (width or height) in pixels.
 
 ## Error Handling
 
-ImgPro provides clear error messages and appropriate exit codes:
+ipro provides clear error messages and appropriate exit codes:
 
 ### Exit Codes
 
@@ -700,7 +700,7 @@ Error: Cannot specify both --width and --height
 
 ### Format Support
 
-ImgPro leverages Pillow (PIL) for image processing and supports a wide range of formats:
+ipro leverages Pillow (PIL) for image processing and supports a wide range of formats:
 
 **Info Command (Read Support):**
 
@@ -766,7 +766,7 @@ See [PRD.md](PRD.md) for the complete product requirements and future enhancemen
 ### Project Structure
 
 ```text
-imgpro/
+ipro/
 ├── .github/
 │   └── workflows/
 │       └── test.yml          # CI/CD pipeline
@@ -793,7 +793,7 @@ imgpro/
 │   ├── test_resize_cli.py   # Resize command integration tests
 │   ├── test_resize_helpers.py # Resize command unit tests
 │   └── test_chain_cli.py    # Command chaining integration tests
-├── imgpro.py              # Main CLI tool
+├── ipro.py              # Main CLI tool
 ├── pyproject.toml           # Package config (enables pipx install)
 ├── requirements.txt         # Python dependencies
 ├── PRD.md                   # Product Requirements Document
@@ -839,7 +839,7 @@ Contributions are welcome! This project follows Test-Driven Development practice
    - Ensure tests fail before implementation
 5. **Implement the feature** until tests pass
 6. **Run the full test suite**: `python -m pytest tests/ -v`
-7. **Check coverage**: `python -m pytest tests/ --cov=imgpro --cov-report=term-missing`
+7. **Check coverage**: `python -m pytest tests/ --cov=ipro --cov-report=term-missing`
 8. **Commit and push** with clear commit messages
 9. **Open a Pull Request** - CI will automatically run all tests
 
@@ -862,7 +862,7 @@ python -m pytest tests/ -v
 python -m pytest tests/test_info_cli.py -v
 
 # Run with coverage
-python -m pytest tests/ --cov=imgpro --cov-report=html
+python -m pytest tests/ --cov=ipro --cov-report=html
 
 # Run specific test
 python -m pytest tests/test_info_cli.py::TestInfoCommandBasics::test_info_command_exists -v
@@ -872,7 +872,7 @@ python -m pytest tests/test_info_cli.py::TestInfoCommandBasics::test_info_comman
 
 See [TASKS.md](TASKS.md) for current priorities and status. Next priorities include:
 
-1. Add field selection to `imgpro info` command
+1. Add field selection to `ipro info` command
 2. Add `--verbose` and `--quiet` modes
 
 For design decisions and feature requirements, refer to [PRD.md](PRD.md).
