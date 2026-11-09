@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ipro is a Python CLI tool for responsive image processing, designed for web developers working with static site generators. It provides commands for inspecting image metadata, resizing, converting formats, and renaming based on EXIF data, with command chaining via `+`.
 
 **Main file:** `ipro.py` (single-file Python script, ~1400 lines)
-**Current version:** 1.3.0
+**Current version:** 1.7.0
 **Python requirement:** 3.8+
 **Primary dependency:** Pillow (PIL), pillow-heif (for HEIF/HEIC support)
 
@@ -72,11 +72,13 @@ The CLI uses argparse subparsers for command routing:
    - `_add_resize_parser(subparsers)` (line 1253)
    - `_add_rename_parser(subparsers)` (line 1272)
    - `_add_convert_parser(subparsers)` (line 1288)
+   - `_add_extract_parser(subparsers)`, `_add_rotate_parser(subparsers)`
 2. Each subcommand has a dedicated handler:
    - `cmd_info(args)` (line 927)
    - `cmd_resize(args)` (line 955)
    - `cmd_rename(args)` (line 1037)
    - `cmd_convert(args)` (line 1144)
+   - `cmd_extract(args)`, `cmd_rotate(args)`
 3. Command chaining via `+` separator handled by `_execute_chain()` (line 1307)
 
 ### Key Helper Functions
@@ -86,6 +88,11 @@ The CLI uses argparse subparsers for command routing:
 - `validate_output_path(output_str, input_path)` - Rejects path traversal, null bytes, warns on absolute paths (line 139)
 - `resolve_output_dir(args_output, input_path)` - Output directory resolution with symlink check (line 183)
 - `ensure_rgb_for_jpeg(img)` - Converts RGBA/LA/P to RGB with white background (line 112)
+- `apply_exif_orientation(img)` - Bakes EXIF Orientation into pixels (`ImageOps.exif_transpose`). Call before measuring dimensions or dropping EXIF (#24)
+- `get_oriented_size(img)` - Displayed (width, height) without decoding pixels
+
+**Image rotation (`rotate` command):**
+- `rotate_image(source_path, output_path, degrees, quality, strip_exif)` - Clockwise 90/180/270 rotation after auto-orient
 
 **Image information (`info` command):**
 - `get_image_info(filepath)` - Main orchestrator for gathering all image metadata (line 680)

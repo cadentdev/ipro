@@ -26,7 +26,7 @@ except ImportError:
     pass  # pillow-heif not installed, HEIF support unavailable
 
 
-__version__ = "1.6.0"
+__version__ = "1.7.0"
 
 # Exit codes
 EXIT_SUCCESS = 0
@@ -46,9 +46,20 @@ Image.MAX_IMAGE_PIXELS = MAX_IMAGE_PIXELS
 # Quality defaults
 DEFAULT_RESIZE_QUALITY = 90
 DEFAULT_CONVERT_QUALITY = 80
+DEFAULT_ROTATE_QUALITY = 90
+
+# Rotation: clockwise degrees -> Pillow transpose method
+ROTATION_TRANSPOSE = {
+    90: Image.Transpose.ROTATE_270,   # Pillow's ROTATE_* are counter-clockwise
+    180: Image.Transpose.ROTATE_180,
+    270: Image.Transpose.ROTATE_90,
+}
+
+# Input formats rotate can write back in place (MPO is saved as JPEG)
+ROTATE_SAVE_FORMATS = {'JPEG': 'JPEG', 'MPO': 'JPEG', 'PNG': 'PNG', 'WEBP': 'WEBP'}
 
 # Known ipro output directory names for chain detection
-IPRO_OUTPUT_DIRS = {'converted', 'renamed', 'extracted', 'output'}
+IPRO_OUTPUT_DIRS = {'converted', 'renamed', 'extracted', 'rotated', 'output'}
 
 
 def is_ipro_output_dir(dirname):
@@ -466,6 +477,96 @@ def convert_image(source_path, output_path, target_format, quality=DEFAULT_CONVE
         except OSError:
             pass
         return False
+
+
+def rotate_image(source_path, output_path, degrees, quality=DEFAULT_ROTATE_QUALITY,
+                 strip_exif=False):
+    """
+    Rotate an image clockwise by 90, 180 or 270 degrees.
+
+    The image is auto-oriented from its EXIF Orientation tag first, so the
+    rotation is relative to how the image is displayed. The output keeps the
+    source format (MPO is written as JPEG). EXIF is preserved by default with
+    the Orientation tag removed and GPS data stripped (as with convert).
+
+    Args:
+        source_path: Path to source image
+        output_path: Path for output image
+        degrees: Clockwise rotation: 90, 180 or 270
+        quality: JPEG/WebP quality 1-100
+        strip_exif: If True, write no EXIF metadata
+
+    Returns:
+        tuple: (width, height) of the rotated image
+
+    Raises:
+        ValueError: If degrees is not 90, 180 or 270, or the format is unsupported
+        OSError: If the image cannot be read or written
+    """
+    if degrees not in ROTATION_TRANSPOSE:
+        raise ValueError(f"Rotation must be 90, 180 or 270 degrees, got {degrees}")
+
+    source_path = Path(source_path)
+    output_path = Path(output_path)
+
+    if output_path.exists() and output_path.is_symlink():
+        raise OSError(f"Output path is a symlink — refusing to write: {output_path}")
+
+    try:
+        source_img = Image.open(source_path)
+    except Image.DecompressionBombError:
+        raise OSError(
+            f"Image exceeds pixel limit ({MAX_IMAGE_PIXELS:,} pixels) — "
+            "possible decompression bomb"
+        )
+    except Exception as e:
+        raise OSError(f"Cannot read image: {source_path} ({e})") from e
+
+    with source_img:
+        save_format = ROTATE_SAVE_FORMATS.get(source_img.format)
+        if save_format is None:
+            raise ValueError(f"Unsupported format for rotate: {source_img.format}")
+
+        # Auto-orient first (reads the Orientation tag), then rotate
+        img = apply_exif_orientation(source_img)
+        img = img.transpose(ROTATION_TRANSPOSE[degrees])
+
+        save_kwargs = {'format': save_format}
+        if save_format in ('JPEG', 'WEBP'):
+            save_kwargs['quality'] = quality
+        if save_format == 'JPEG':
+            img = ensure_rgb_for_jpeg(img)
+
+        icc_profile = source_img.info.get('icc_profile')
+        if icc_profile:
+            save_kwargs['icc_profile'] = icc_profile
+
+        if not strip_exif:
+            try:
+                exif_data = source_img.getexif()
+            except Exception:
+                exif_data = None
+            if exif_data:
+                if EXIF_ORIENTATION_TAG in exif_data:
+                    del exif_data[EXIF_ORIENTATION_TAG]
+                exif_data, gps_stripped = _strip_gps_from_exif(exif_data)
+                if gps_stripped:
+                    print("Note: GPS metadata stripped from output", file=sys.stderr)
+                if len(exif_data):
+                    save_kwargs['exif'] = exif_data
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            img.save(output_path, **save_kwargs)
+        except Exception:
+            try:
+                if output_path.exists():
+                    output_path.unlink()
+            except OSError:
+                pass
+            raise
+
+        return img.size
 
 
 def parse_sizes(size_str):
@@ -1442,6 +1543,59 @@ def cmd_extract(args):
     return [str(f['path']) for f in created_files]
 
 
+def cmd_rotate(args):
+    """Handle the rotate subcommand."""
+    input_path = validate_input_file(args.file)
+
+    if not (1 <= args.quality <= 100):
+        print(f"Error: Quality must be between 1-100, got {args.quality}", file=sys.stderr)
+        sys.exit(EXIT_INVALID_ARGS)
+
+    image_format = get_image_format(input_path)
+    if image_format is None:
+        print(f"Error: Cannot read image: {input_path}", file=sys.stderr)
+        sys.exit(EXIT_READ_ERROR)
+    if image_format not in ROTATE_SAVE_FORMATS:
+        print(f"Error: Unsupported format for rotate: {image_format}. "
+              f"Rotate supports JPEG, MPO, PNG and WebP.", file=sys.stderr)
+        print("Use 'convert' first, e.g.: "
+              "ipro convert <file> --format jpeg + rotate --degrees 90", file=sys.stderr)
+        sys.exit(EXIT_UNSUPPORTED_FORMAT)
+
+    # Warn if multi-frame image — only the primary frame will be rotated
+    try:
+        with Image.open(input_path) as img:
+            n_frames = getattr(img, 'n_frames', 1)
+        if n_frames > 1:
+            print(f"Warning: {input_path.name} contains {n_frames} frames; "
+                  f"only the primary frame will be rotated. "
+                  f"Use 'extract' to export all frames.",
+                  file=sys.stderr)
+    except Exception:
+        pass
+
+    output_dir = resolve_output_dir(args.output, input_path, "rotated")
+    output_path = output_dir / input_path.name
+
+    if output_path.exists():
+        print(f"Warning: Overwriting existing file: {output_path}", file=sys.stderr)
+
+    try:
+        width, height = rotate_image(
+            input_path,
+            output_path,
+            args.degrees,
+            quality=args.quality,
+            strip_exif=args.strip_exif,
+        )
+    except (OSError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(EXIT_READ_ERROR)
+
+    print(f"Created: {output_path} ({width}x{height}, rotated {args.degrees}° clockwise)")
+    return [str(output_path)]
+
+
 def main():
     """Main entry point for ipro CLI."""
     # Save current directory to restore after processing
@@ -1481,6 +1635,7 @@ def _create_parser():
     _add_rename_parser(subparsers)
     _add_convert_parser(subparsers)
     _add_extract_parser(subparsers)
+    _add_rotate_parser(subparsers)
 
     return parser
 
@@ -1566,6 +1721,28 @@ def _add_extract_parser(subparsers):
     extract_parser.add_argument('--output', default=None,
                                 help='Output directory (default: extracted/)')
     extract_parser.set_defaults(func=cmd_extract)
+
+
+def _add_rotate_parser(subparsers):
+    """Add the rotate subcommand parser."""
+    rotate_parser = subparsers.add_parser(
+        'rotate',
+        help='Rotate images clockwise by 90, 180 or 270 degrees',
+        description='Rotate an image clockwise in 90-degree increments. '
+                    'EXIF orientation is applied first, so rotation is relative '
+                    'to how the image is displayed.'
+    )
+    rotate_parser.add_argument('file', help='Path to image file')
+    rotate_parser.add_argument('--degrees', '-d', type=int, required=True,
+                               choices=sorted(ROTATION_TRANSPOSE),
+                               help='Clockwise rotation in degrees (90, 180, 270)')
+    rotate_parser.add_argument('--output', default=None,
+                               help='Output directory (default: rotated/)')
+    rotate_parser.add_argument('--quality', type=int, default=DEFAULT_ROTATE_QUALITY,
+                               help=f'JPEG/WebP quality 1-100 (default: {DEFAULT_ROTATE_QUALITY})')
+    rotate_parser.add_argument('--strip-exif', action='store_true',
+                               help='Remove EXIF metadata from output')
+    rotate_parser.set_defaults(func=cmd_rotate)
 
 
 def _execute_chain(segments):
