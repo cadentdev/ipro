@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from PIL import Image
 from PIL import ImageCms
+from PIL import ImageOps
 from PIL.ExifTags import TAGS
 from PIL.TiffImagePlugin import IFDRational
 import os
@@ -124,6 +125,54 @@ def get_target_extension(format_str):
         String: Extension with dot (e.g., ".jpg") or None if unsupported
     """
     return SUPPORTED_OUTPUT_FORMATS.get(format_str.lower())
+
+
+# EXIF Orientation tag ID and the values that swap width/height when applied
+EXIF_ORIENTATION_TAG = 0x0112
+_ORIENTATIONS_SWAPPING_AXES = {5, 6, 7, 8}
+
+
+def _get_exif_orientation(img):
+    """Return the EXIF Orientation value of an image, or 1 if absent/invalid."""
+    try:
+        value = img.getexif().get(EXIF_ORIENTATION_TAG, 1)
+        return int(value) if value else 1
+    except Exception:
+        return 1
+
+
+def get_oriented_size(img):
+    """Return (width, height) as the image is displayed, honoring EXIF Orientation.
+
+    Cheap: does not decode or transpose the pixel data.
+    """
+    width, height = img.size
+    if _get_exif_orientation(img) in _ORIENTATIONS_SWAPPING_AXES:
+        return height, width
+    return width, height
+
+
+def apply_exif_orientation(img):
+    """Bake the EXIF Orientation tag into the pixel data.
+
+    Equivalent to ImageMagick's -auto-orient. The returned image is upright
+    and its EXIF no longer carries an Orientation other than 1, so stripping
+    metadata afterwards is lossless. Must run before measuring dimensions or
+    discarding EXIF, otherwise outputs are silently written sideways (#24).
+
+    Args:
+        img: PIL Image
+
+    Returns:
+        PIL Image (a transposed copy, or the original if no change applies)
+    """
+    if _get_exif_orientation(img) == 1:
+        return img
+    try:
+        transposed = ImageOps.exif_transpose(img)
+    except Exception:
+        return img
+    return transposed if transposed is not None else img
 
 
 def ensure_rgb_for_jpeg(img):
@@ -343,14 +392,24 @@ def convert_image(source_path, output_path, target_format, quality=DEFAULT_CONVE
                   file=sys.stderr)
             return False
 
-        with Image.open(source_path) as img:
+        with Image.open(source_path) as source_img:
+            # Bake EXIF orientation into pixels before metadata can be lost (#24).
+            # This must happen before the EXIF below is touched, since it reads
+            # the Orientation tag from the same EXIF object.
+            img = apply_exif_orientation(source_img)
+
             # Get EXIF data if we need to preserve it
             exif_data = None
             if not strip_exif:
                 try:
-                    exif_data = img.getexif()
+                    exif_data = source_img.getexif()
                 except Exception:
                     exif_data = None
+
+                # Pixels are auto-oriented below, so the tag must not be kept
+                # or viewers would rotate the image a second time
+                if exif_data and EXIF_ORIENTATION_TAG in exif_data:
+                    del exif_data[EXIF_ORIENTATION_TAG]
 
                 # Strip GPS data by default when preserving EXIF (privacy protection)
                 if exif_data:
@@ -711,8 +770,8 @@ def get_image_info(filepath):
 
     # Open image
     with Image.open(filepath) as img:
-        # Get dimensions (EXIF orientation is already handled by Pillow in most cases)
-        width, height = img.size
+        # Report displayed dimensions, honoring the EXIF Orientation tag
+        width, height = get_oriented_size(img)
         image_format = img.format
         n_frames = getattr(img, 'n_frames', 1)
 
@@ -782,7 +841,12 @@ def resize_image(input_path, output_dir, sizes, dimension='width', quality=DEFAU
         raise OSError(f"Cannot read image: {input_path} ({e})") from e
 
     with img:
-        # Get original dimensions
+        # Bake EXIF orientation into pixels before measuring or stripping
+        # metadata, so outputs are upright and the size constraint lands on
+        # the displayed axis (#24)
+        img = apply_exif_orientation(img)
+
+        # Get original (displayed) dimensions
         orig_width, orig_height = img.size
 
         # Prepare output
@@ -920,8 +984,11 @@ def extract_frames(input_path, output_dir):
                       file=sys.stderr)
                 continue
 
+            # Copy the frame and bake in its EXIF orientation, since frames
+            # are saved without EXIF (#24)
+            frame_img = apply_exif_orientation(img.copy())
+
             # Convert to RGB for JPEG output
-            frame_img = img.copy()
             if save_format == 'JPEG':
                 frame_img = ensure_rgb_for_jpeg(frame_img)
 
@@ -1118,7 +1185,7 @@ def cmd_resize(args):
     # Get image dimensions for output
     try:
         with Image.open(input_path) as img:
-            orig_width, orig_height = img.size
+            orig_width, orig_height = get_oriented_size(img)
     except Exception as e:
         print(f"Error: Cannot read image: {input_path}", file=sys.stderr)
         sys.exit(EXIT_READ_ERROR)

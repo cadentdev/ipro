@@ -184,3 +184,69 @@ def create_mpo_file(directory, filename='test.mpo',
     frame1.save(filepath, format='MPO', save_all=True, append_images=[frame2])
 
     return filepath
+
+
+# EXIF Orientation tag ID (0x0112)
+EXIF_ORIENTATION_TAG = 0x0112
+
+
+def create_oriented_image_file(directory, filename='oriented.jpg',
+                               stored_size=(400, 200), orientation=6,
+                               extra_exif=None):
+    """
+    Create a JPEG whose *stored* pixels are split left-red / right-blue and
+    which carries an EXIF Orientation tag (e.g. 6 = iPhone portrait).
+
+    With orientation 6 (rotate 90 CW to display), the displayed image is
+    portrait, with red on top and blue on the bottom.
+
+    Args:
+        directory: Directory to save the file in
+        filename: Output filename
+        stored_size: (width, height) of the stored pixel data
+        orientation: EXIF Orientation value (1-8)
+        extra_exif: Optional dict of {tag_id: value} to add to EXIF
+
+    Returns:
+        Path: Path to created file
+    """
+    width, height = stored_size
+    img = Image.new('RGB', (width, height), (0, 0, 255))
+    img.paste((255, 0, 0), (0, 0, width // 2, height))
+
+    exif = Image.Exif()
+    exif[EXIF_ORIENTATION_TAG] = orientation
+    for tag_id, value in (extra_exif or {}).items():
+        exif[tag_id] = value
+
+    filepath = Path(directory) / filename
+    img.save(filepath, format='JPEG', quality=95, exif=exif)
+    return filepath
+
+
+def create_split_image_file(directory, filename='split.jpg', size=(400, 200),
+                            format='JPEG'):
+    """
+    Create an image (no EXIF) split left-red / right-blue.
+
+    Returns:
+        Path: Path to created file
+    """
+    width, height = size
+    img = Image.new('RGB', (width, height), (0, 0, 255))
+    img.paste((255, 0, 0), (0, 0, width // 2, height))
+    filepath = Path(directory) / filename
+    img.save(filepath, format=format)
+    return filepath
+
+
+def is_red(pixel):
+    """True if an RGB pixel is predominantly red (tolerant of JPEG noise)."""
+    r, g, b = pixel[:3]
+    return r > 200 and g < 60 and b < 60
+
+
+def is_blue(pixel):
+    """True if an RGB pixel is predominantly blue (tolerant of JPEG noise)."""
+    r, g, b = pixel[:3]
+    return b > 200 and r < 60 and g < 60
