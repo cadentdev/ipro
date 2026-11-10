@@ -250,3 +250,37 @@ def is_blue(pixel):
     """True if an RGB pixel is predominantly blue (tolerant of JPEG noise)."""
     r, g, b = pixel[:3]
     return b > 200 and r < 60 and g < 60
+
+
+def create_heic_file(directory, filename='IMG_3751.HEIC', size=(300, 400),
+                     color=(0, 128, 255)):
+    """
+    Create a real HEIC/HEIF file (requires pillow-heif).
+
+    Defaults mimic an iPhone portrait photo (3:4) at a small size.
+
+    Returns:
+        Path: Path to created file
+    """
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+
+    filepath = Path(directory) / filename
+    Image.new('RGB', size, color).save(filepath, format='HEIF', quality=80)
+    return filepath
+
+
+def create_jpeg_with_heic_extension(directory, filename='IMG_3494.HEIC',
+                                    stored_size=(400, 300), orientation=6):
+    """
+    Create a JPEG saved with a misleading .HEIC extension, as photo-library
+    exports sometimes produce. Like an iPhone portrait, the pixels are stored
+    landscape with EXIF Orientation=6, so it displays as 3:4 portrait.
+
+    Returns:
+        Path: Path to created file
+    """
+    return create_oriented_image_file(
+        directory, filename, stored_size=stored_size, orientation=orientation,
+        extra_exif={0x010F: 'Apple', 0x0110: 'iPhone 15 Pro'},
+    )

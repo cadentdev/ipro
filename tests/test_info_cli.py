@@ -428,19 +428,10 @@ class TestInfoEdgeCases:
         assert data['ratio_raw'] == '1234:567'
         assert data['common_ratio'] == 'none'
 
-    def test_info_heif_format(self):
+    def test_info_heif_format(self, sample_heic_image):
         """Test that HEIF files can be processed if pillow-heif is installed."""
-        # This test uses the real HEIF file from our test directory
-        from pathlib import Path
-        heif_test_file = Path(__file__).parent.parent / "img" / "tai_ping_socials" / "IMG_3751.HEIC"
-
-        if not heif_test_file.exists():
-            pytest.skip("Test HEIF file not available")
-
-        try:
-            from pillow_heif import register_heif_opener
-        except ImportError:
-            pytest.skip("pillow-heif not installed")
+        # Synthetic 300x400 HEIC (fixture skips if pillow-heif is missing)
+        heif_test_file = sample_heic_image
 
         # Test default output
         exit_code, stdout, stderr = run_ipro_info(heif_test_file)
@@ -456,8 +447,9 @@ class TestInfoEdgeCases:
         assert exit_code == 0
         data = json.loads(stdout)
         assert data['filename'] == 'IMG_3751.HEIC'
-        assert data['width'] == 3024
-        assert data['height'] == 4032
+        assert data['format'] == 'HEIF'
+        assert data['width'] == 300
+        assert data['height'] == 400
         assert data['orientation'] == 'portrait'
         assert data['ratio_raw'] == '3:4'
 
@@ -466,5 +458,5 @@ class TestInfoEdgeCases:
 
         assert exit_code == 0
         assert 'IMG_3751.HEIC' in stdout
-        assert '3024' in stdout
-        assert '4032' in stdout
+        assert '300' in stdout
+        assert '400' in stdout

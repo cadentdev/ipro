@@ -35,7 +35,7 @@ python3 ipro.py resize photo.jpg --width 300,600 + convert --format webp
 
 ### Testing
 ```bash
-# Run all tests (355 total)
+# Run all tests (445 total; 1 skips without the local DNG sample)
 python -m pytest tests/ -v
 
 # Run specific test file
@@ -181,7 +181,7 @@ tests/
 - **Rename command:** 100% coverage
 - **Command chaining:** 100% coverage
 - **Security tests:** 25 tests covering path traversal, symlinks, decompression bombs, size limits, GPS stripping
-- **Overall:** 355 total tests
+- **Overall:** 445 total tests
 
 ## PRD and Task Tracking
 
