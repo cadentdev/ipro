@@ -1621,8 +1621,13 @@ def _create_parser():
         description='ipro - Command-line tool for responsive image processing',
         epilog=(
             'Use "ipro <command> --help" for more information about a command.\n'
-            'Chain commands with +: ipro resize img.jpg --width 300 + convert --format webp'
-        )
+            'Chain commands with +: ipro resize img.jpg --width 300 + convert --format webp\n'
+            '                       ipro resize img.jpg --width 1080 + rotate --degrees 90\n'
+            '\n'
+            'All commands honor EXIF orientation (e.g. iPhone portrait photos): images are\n'
+            'auto-oriented before processing, so outputs are upright even without EXIF.'
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     parser.add_argument('--version', '-v', action='version', version=f'ipro {__version__}')
@@ -1645,7 +1650,8 @@ def _add_info_parser(subparsers):
     info_parser = subparsers.add_parser(
         'info',
         help='Display image information and metadata',
-        description='Inspect an image file and report metadata, orientation, and aspect ratio'
+        description='Inspect an image file and report metadata, orientation, and aspect ratio. '
+                    'Dimensions and orientation honor EXIF orientation (as displayed).'
     )
     info_parser.add_argument('file', help='Path to image file')
     info_parser.add_argument('--json', action='store_true', help='Output in JSON format')
@@ -1660,7 +1666,9 @@ def _add_resize_parser(subparsers):
     resize_parser = subparsers.add_parser(
         'resize',
         help='Resize images to multiple dimensions',
-        description='Resize an image to multiple widths or heights while maintaining aspect ratio'
+        description='Resize an image to multiple widths or heights while maintaining aspect ratio. '
+                    'EXIF orientation is applied first, so --width/--height refer to the '
+                    'displayed image and outputs are upright (EXIF is stripped).'
     )
     resize_parser.add_argument('--width', type=str,
                                help='Comma-separated list of target widths (e.g., 300,600,900)')
@@ -1695,7 +1703,9 @@ def _add_convert_parser(subparsers):
     convert_parser = subparsers.add_parser(
         'convert',
         help='Convert images between formats',
-        description='Convert images to different formats (e.g., HEIC to JPEG)'
+        description='Convert images to different formats (e.g., HEIC to JPEG). '
+                    'EXIF orientation is applied to the pixels, so output is upright '
+                    'with or without --strip-exif.'
     )
     convert_parser.add_argument('file', help='Path to source image file')
     convert_parser.add_argument('--format', '-f', required=True,
@@ -1705,7 +1715,7 @@ def _add_convert_parser(subparsers):
     convert_parser.add_argument('--quality', type=int, default=DEFAULT_CONVERT_QUALITY,
                                 help=f'JPEG quality 1-100 (default: {DEFAULT_CONVERT_QUALITY})')
     convert_parser.add_argument('--strip-exif', action='store_true',
-                                help='Remove EXIF metadata from output')
+                                help='Remove EXIF metadata from output (image stays upright)')
     convert_parser.set_defaults(func=cmd_convert)
 
 
@@ -1715,7 +1725,8 @@ def _add_extract_parser(subparsers):
         'extract',
         help='Extract frames from multi-frame images',
         description='Export individual frames from multi-frame image formats '
-                    '(MPO, animated GIF, APNG, animated WebP, multi-page TIFF)'
+                    '(MPO, animated GIF, APNG, animated WebP, multi-page TIFF). '
+                    'Frames are auto-oriented from EXIF orientation.'
     )
     extract_parser.add_argument('file', help='Path to image file')
     extract_parser.add_argument('--output', default=None,
@@ -1730,7 +1741,12 @@ def _add_rotate_parser(subparsers):
         help='Rotate images clockwise by 90, 180 or 270 degrees',
         description='Rotate an image clockwise in 90-degree increments. '
                     'EXIF orientation is applied first, so rotation is relative '
-                    'to how the image is displayed.'
+                    'to how the image is displayed.',
+        epilog='examples:\n'
+               '  ipro rotate photo.jpg --degrees 90     # 90 degrees clockwise\n'
+               '  ipro rotate photo.jpg --degrees 270    # 90 degrees counter-clockwise\n'
+               '  ipro resize photo.jpg --width 1080 + rotate --degrees 90',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     rotate_parser.add_argument('file', help='Path to image file')
     rotate_parser.add_argument('--degrees', '-d', type=int, required=True,
@@ -1741,7 +1757,8 @@ def _add_rotate_parser(subparsers):
     rotate_parser.add_argument('--quality', type=int, default=DEFAULT_ROTATE_QUALITY,
                                help=f'JPEG/WebP quality 1-100 (default: {DEFAULT_ROTATE_QUALITY})')
     rotate_parser.add_argument('--strip-exif', action='store_true',
-                               help='Remove EXIF metadata from output')
+                               help='Remove all EXIF metadata from output '
+                                    '(by default EXIF is kept, GPS data is stripped)')
     rotate_parser.set_defaults(func=cmd_rotate)
 
 

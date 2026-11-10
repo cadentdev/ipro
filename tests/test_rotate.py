@@ -245,3 +245,19 @@ class TestRotateMultiFrame:
         with Image.open(out) as img:
             assert img.format == 'JPEG'
             assert img.size == (600, 800)
+
+
+class TestRotateHelpText:
+
+    def test_main_help_lists_rotate_in_chaining_example(self):
+        result = run_ipro('--help')
+        text = ' '.join(result.stdout.split())
+        assert 'rotate --degrees' in text
+
+    def test_rotate_help_mentions_gps_stripping(self):
+        result = run_ipro('rotate', '--help')
+        assert 'GPS' in result.stdout
+
+    def test_rotate_help_shows_example(self):
+        result = run_ipro('rotate', '--help')
+        assert 'ipro rotate photo.jpg --degrees 90' in result.stdout

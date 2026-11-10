@@ -243,3 +243,22 @@ class TestChainOrientation:
         with Image.open(out) as img:
             assert img.size == (100, 200)
         _assert_portrait_red_on_top(out)
+
+
+class TestOrientationHelpText:
+    """--help for each affected command documents EXIF auto-orientation."""
+
+    @pytest.mark.parametrize('command', ['info', 'resize', 'convert', 'extract'])
+    def test_help_mentions_exif_orientation(self, command):
+        result = run_ipro(command, '--help')
+        assert result.returncode == 0
+        assert 'EXIF orientation' in ' '.join(result.stdout.split())
+
+    def test_resize_help_says_sizes_use_displayed_axis(self):
+        result = run_ipro('resize', '--help')
+        assert 'displayed' in result.stdout
+
+    def test_convert_strip_exif_help_says_orientation_kept(self):
+        result = run_ipro('convert', '--help')
+        text = ' '.join(result.stdout.split())
+        assert 'upright' in text
