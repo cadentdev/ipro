@@ -17,6 +17,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.0] - 2026-11-09
+
+### Added
+- **`rotate` subcommand** (closes #23):
+  - `ipro rotate <file> --degrees {90,180,270}` rotates clockwise
+  - Applies EXIF orientation first, so rotation is relative to the displayed image
+  - Supports JPEG, MPO (written as JPEG), PNG, WebP; preserves format and filename
+  - Output to `rotated/` by default; `--output`, `--quality`, `--strip-exif` options
+  - EXIF preserved by default (Orientation reset, GPS stripped)
+  - Chainable via `+` (e.g. `resize photo.jpg --width 1080 + rotate --degrees 90`)
+
+### Fixed
+- **EXIF orientation discarded, producing sideways images** (fixes #24):
+  - `resize`, `convert` (including `--strip-exif`) and `extract` now bake the EXIF
+    Orientation tag into the pixel data before writing (like `-auto-orient`)
+  - `resize --width/--height` now constrain the displayed axis, not the stored one
+  - `convert` drops the Orientation tag when preserving EXIF, preventing double rotation
+  - `info` and `resize` report displayed dimensions and orientation
+
+---
+
 ## [1.4.0] - 2026-02-27
 
 ### Added

@@ -44,6 +44,17 @@ A command-line tool for generating multiple resolutions of images to support res
 - **Extension Correction**: Fix mismatched extensions based on actual file format
 - **Non-Destructive**: Creates copies, preserving originals
 
+### Rotate Command (v1.7+)
+
+- **90-Degree Rotation**: Rotate clockwise by 90, 180, or 270 degrees
+- **Orientation-Aware**: Applies EXIF orientation first, so rotation is relative to how the image is displayed
+- **Format Preserving**: JPEG, PNG, and WebP keep their format and filename (output in `rotated/`)
+- **Chainable**: Combine with other commands via `+`
+
+### EXIF Orientation (v1.7+)
+
+All commands honor the EXIF `Orientation` tag (e.g. iPhone portrait photos). Pixels are auto-oriented before resizing, converting, or extracting, so outputs are upright even when EXIF is stripped, and `--width`/`--height` apply to the displayed axis. `info` reports displayed dimensions.
+
 ## Installation
 
 ### Install from PyPI (recommended)
@@ -409,6 +420,46 @@ python3 ipro.py rename photo.jpg --prefix-exif-date
 ```bash
 # photo.HEIC (JPEG, taken 2024-11-12 14:30:00) → 2024-11-12T143000_photo.jpg
 python3 ipro.py rename photo.HEIC --ext --prefix-exif-date
+```
+
+---
+
+## Rotate Command
+
+Rotate images clockwise in 90-degree increments.
+
+### Rotate Command Usage
+
+```bash
+python3 ipro.py rotate <file> --degrees <90|180|270> [options]
+```
+
+### Rotate Parameters
+
+**Required:**
+
+- `<file>`: Path to image file (JPEG, MPO, PNG, or WebP)
+- `--degrees <90|180|270>` (`-d`): Clockwise rotation
+
+**Optional:**
+
+- `--quality <1-100>` (default: 90): Quality for JPEG/WebP output
+- `--output <directory>` (default: `rotated/` next to source file): Output directory
+- `--strip-exif`: Remove EXIF metadata from output (GPS is always stripped)
+
+EXIF orientation is applied before rotating, so `--degrees` is relative to how the image is displayed. Other formats (HEIC, TIFF, BMP, ...) can be converted first: `ipro convert photo.heic --format jpeg + rotate --degrees 90`.
+
+### Rotate Examples
+
+```bash
+# Rotate 90 degrees clockwise
+python3 ipro.py rotate photo.jpg --degrees 90
+
+# Rotate 90 degrees counter-clockwise
+python3 ipro.py rotate photo.jpg --degrees 270
+
+# Resize, then rotate
+python3 ipro.py resize photo.jpg --width 1080 + rotate --degrees 90
 ```
 
 ---

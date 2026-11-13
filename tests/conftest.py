@@ -7,6 +7,8 @@ from pathlib import Path
 from .fixtures import (
     create_test_image_file,
     create_mpo_file,
+    create_heic_file,
+    create_jpeg_with_heic_extension,
     ASPECT_RATIOS,
     EXIF_DATA_FULL,
     EXIF_DATA_MINIMAL,
@@ -114,3 +116,16 @@ def sample_mpo_image(temp_dir):
         frame1_color=(255, 0, 0),
         frame2_color=(0, 0, 255),
     )
+
+
+@pytest.fixture
+def sample_heic_image(temp_dir):
+    """Create a real 300x400 (3:4 portrait) HEIC file. Skips without pillow-heif."""
+    pytest.importorskip('pillow_heif')
+    return create_heic_file(temp_dir, filename='IMG_3751.HEIC', size=(300, 400))
+
+
+@pytest.fixture
+def sample_jpeg_named_heic(temp_dir):
+    """Create a JPEG named .HEIC: stored 400x300 with Orientation=6 (displays 300x400)."""
+    return create_jpeg_with_heic_extension(temp_dir, filename='IMG_3494.HEIC')

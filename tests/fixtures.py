@@ -184,3 +184,103 @@ def create_mpo_file(directory, filename='test.mpo',
     frame1.save(filepath, format='MPO', save_all=True, append_images=[frame2])
 
     return filepath
+
+
+# EXIF Orientation tag ID (0x0112)
+EXIF_ORIENTATION_TAG = 0x0112
+
+
+def create_oriented_image_file(directory, filename='oriented.jpg',
+                               stored_size=(400, 200), orientation=6,
+                               extra_exif=None):
+    """
+    Create a JPEG whose *stored* pixels are split left-red / right-blue and
+    which carries an EXIF Orientation tag (e.g. 6 = iPhone portrait).
+
+    With orientation 6 (rotate 90 CW to display), the displayed image is
+    portrait, with red on top and blue on the bottom.
+
+    Args:
+        directory: Directory to save the file in
+        filename: Output filename
+        stored_size: (width, height) of the stored pixel data
+        orientation: EXIF Orientation value (1-8)
+        extra_exif: Optional dict of {tag_id: value} to add to EXIF
+
+    Returns:
+        Path: Path to created file
+    """
+    width, height = stored_size
+    img = Image.new('RGB', (width, height), (0, 0, 255))
+    img.paste((255, 0, 0), (0, 0, width // 2, height))
+
+    exif = Image.Exif()
+    exif[EXIF_ORIENTATION_TAG] = orientation
+    for tag_id, value in (extra_exif or {}).items():
+        exif[tag_id] = value
+
+    filepath = Path(directory) / filename
+    img.save(filepath, format='JPEG', quality=95, exif=exif)
+    return filepath
+
+
+def create_split_image_file(directory, filename='split.jpg', size=(400, 200),
+                            format='JPEG'):
+    """
+    Create an image (no EXIF) split left-red / right-blue.
+
+    Returns:
+        Path: Path to created file
+    """
+    width, height = size
+    img = Image.new('RGB', (width, height), (0, 0, 255))
+    img.paste((255, 0, 0), (0, 0, width // 2, height))
+    filepath = Path(directory) / filename
+    img.save(filepath, format=format)
+    return filepath
+
+
+def is_red(pixel):
+    """True if an RGB pixel is predominantly red (tolerant of JPEG noise)."""
+    r, g, b = pixel[:3]
+    return r > 200 and g < 60 and b < 60
+
+
+def is_blue(pixel):
+    """True if an RGB pixel is predominantly blue (tolerant of JPEG noise)."""
+    r, g, b = pixel[:3]
+    return b > 200 and r < 60 and g < 60
+
+
+def create_heic_file(directory, filename='IMG_3751.HEIC', size=(300, 400),
+                     color=(0, 128, 255)):
+    """
+    Create a real HEIC/HEIF file (requires pillow-heif).
+
+    Defaults mimic an iPhone portrait photo (3:4) at a small size.
+
+    Returns:
+        Path: Path to created file
+    """
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+
+    filepath = Path(directory) / filename
+    Image.new('RGB', size, color).save(filepath, format='HEIF', quality=80)
+    return filepath
+
+
+def create_jpeg_with_heic_extension(directory, filename='IMG_3494.HEIC',
+                                    stored_size=(400, 300), orientation=6):
+    """
+    Create a JPEG saved with a misleading .HEIC extension, as photo-library
+    exports sometimes produce. Like an iPhone portrait, the pixels are stored
+    landscape with EXIF Orientation=6, so it displays as 3:4 portrait.
+
+    Returns:
+        Path: Path to created file
+    """
+    return create_oriented_image_file(
+        directory, filename, stored_size=stored_size, orientation=orientation,
+        extra_exif={0x010F: 'Apple', 0x0110: 'iPhone 15 Pro'},
+    )

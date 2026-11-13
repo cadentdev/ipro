@@ -541,19 +541,9 @@ class TestHeifSupport:
         except ImportError:
             pytest.skip("pillow-heif not installed")
 
-    def test_heif_file_reading(self, tmp_path):
-        """Test reading a real HEIF file if available."""
-        # This test uses the real HEIF file from our test directory
-        heif_test_file = Path(__file__).parent.parent / "img" / "tai_ping_socials" / "IMG_3751.HEIC"
-
-        if not heif_test_file.exists():
-            pytest.skip("Test HEIF file not available")
-
-        try:
-            from pillow_heif import register_heif_opener
-            register_heif_opener()
-        except ImportError:
-            pytest.skip("pillow-heif not installed")
+    def test_heif_file_reading(self, sample_heic_image):
+        """Test reading a HEIF file (synthetic 300x400 HEIC)."""
+        heif_test_file = sample_heic_image
 
         # Test that we can read the HEIF file
         assert get_image_info is not None
@@ -566,23 +556,25 @@ class TestHeifSupport:
         assert info['height'] > 0
         assert 'orientation' in info
         assert 'ratio_raw' in info
+        assert info['format'] == 'HEIF'
+        assert (info['width'], info['height']) == (300, 400)
+        assert info['orientation'] == 'portrait'
 
-    def test_misleading_heic_extension_jpeg_content(self):
+    def test_misleading_heic_extension_jpeg_content(self, sample_jpeg_named_heic):
         """Test file with .HEIC extension but actually contains JPEG data."""
         # Some files are renamed with .HEIC extension but contain JPEG data
-        # This is common when exporting from photo libraries
-        misleading_file = Path(__file__).parent.parent / "img" / "tai_ping_socials" / "IMG_3494.HEIC"
-
-        if not misleading_file.exists():
-            pytest.skip("Test file with misleading extension not available")
+        # This is common when exporting from photo libraries. The synthetic
+        # file is stored 400x300 with EXIF Orientation=6, like an iPhone photo.
+        misleading_file = sample_jpeg_named_heic
 
         # Should still work - Pillow reads based on content, not extension
         assert get_image_info is not None
         info = get_image_info(misleading_file)
 
         # Verify it reads successfully despite misleading extension
-        assert info['width'] == 3024
-        assert info['height'] == 4032
+        assert info['format'] == 'JPEG'
+        assert info['width'] == 300
+        assert info['height'] == 400
         assert info['orientation'] == 'portrait'
         assert info['ratio_raw'] == '3:4'
         # This file is actually JPEG, so it should have EXIF
