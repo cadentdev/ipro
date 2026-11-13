@@ -1,6 +1,6 @@
 # ipro
 
-CLI tool for responsive image processing — resize, convert, rename, and chain operations from the command line.
+CLI tool for responsive image processing — resize, convert, rotate, rename, and chain operations from the command line.
 
 ## Install
 
@@ -19,6 +19,7 @@ pip install ipro-cli
 | `ipro convert` | Convert between JPEG, PNG, WebP, with quality control |
 | `ipro rename` | Fix extensions, add EXIF date prefix |
 | `ipro extract` | Extract frames from MPO, GIF, APNG, WebP, TIFF |
+| `ipro rotate` | Rotate 90°, 180° or 270° clockwise |
 
 ## Quick Examples
 
@@ -35,6 +36,9 @@ ipro convert photo.heic --format jpeg --quality 85
 # Convert to WebP for web optimization
 ipro convert photo.jpg --format webp --quality 80
 
+# Rotate 90 degrees clockwise
+ipro rotate photo.jpg --degrees 90
+
 # Chain commands: convert then resize in one pass
 ipro convert photo.heic --format jpeg --quality 80 + resize --width 1080
 
@@ -50,6 +54,7 @@ for img in *.jpg; do ipro resize "$img" --width 1500; done
 ## Features
 
 - Chain commands with `+` — `resize + convert` in a single pass
+- Honors EXIF orientation — iPhone portrait photos stay upright when resized or converted
 - Smart upscaling prevention — skips sizes larger than the original
 - Lanczos resampling for high-quality output
 - Automatic sRGB color profile conversion
